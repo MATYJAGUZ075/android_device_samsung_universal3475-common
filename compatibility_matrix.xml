@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Matriz de compatibilidad del DEVICE (FCM): qué exige el dispositivo al
+     framework. Modelo: skeleton autogenerado del porte Exynos7420 (LOS 20),
+     recortado a las interfaces de framework que nuestro stack legacy usa.
+     TODO(fase 3): validar contra la salida real de lpmake/vintf y ajustar. -->
+<compatibility-matrix version="2.0" type="device">
+    <hal format="hidl" optional="false">
+        <name>android.hidl.manager</name>
+        <version>1.0</version>
+        <interface>
+            <name>IServiceManager</name>
+            <instance>default</instance>
+        </interface>
+    </hal>
+    <hal format="hidl" optional="true">
+        <name>android.frameworks.sensorservice</name>
+        <version>1.0</version>
+        <interface>
+            <name>ISensorManager</name>
+            <instance>default</instance>
+        </interface>
+    </hal>
+    <hal format="hidl" optional="true">
+        <name>android.frameworks.displayservice</name>
+        <version>1.0</version>
+        <interface>
+            <name>IDisplayService</name>
+            <instance>default</instance>
+        </interface>
+    </hal>
+    <!-- TODO(fase 3): revisar entradas requeridas por los blobs (drm,
+         keymaster, media) cuando se pruebe el arranque real. -->
+</compatibility-matrix>

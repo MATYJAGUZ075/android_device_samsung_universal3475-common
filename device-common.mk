@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2018 The LineageOS Project
+# Copyright (C) 2018-2026 The LineageOS Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,18 +18,9 @@ LOCAL_PATH := device/samsung/universal3475-common
 
 DEVICE_PACKAGE_OVERLAYS += $(LOCAL_PATH)/overlay
 
-# ADB Insecure
-PRODUCT_PROPERTY_OVERRIDES += \
-    ro.secure=0 \
-    ro.adb.secure=0 \
-    ro.debuggable=1 \
-    persist.service.adb.enable=1 \
-    persist.service.debuggable=1 \
-    persist.sys.usb.config=mtp,adb
-
-
+# Audio policy XML (formato moderno; el .conf legacy ya no se copia en T).
+# TODO(fase 4): regenerar audio_policy_configuration.xml a version 7.0.
 PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/configs/audio/audio_policy.conf:$(TARGET_COPY_OUT_SYSTEM)/etc/audio_policy.conf \
     frameworks/av/services/audiopolicy/config/audio_policy_volumes.xml:$(TARGET_COPY_OUT_VENDOR)/etc/audio_policy_volumes.xml \
     frameworks/av/services/audiopolicy/config/a2dp_audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/a2dp_audio_policy_configuration.xml \
     frameworks/av/services/audiopolicy/config/default_volume_tables.xml:$(TARGET_COPY_OUT_VENDOR)/etc/default_volume_tables.xml \
@@ -37,7 +28,7 @@ PRODUCT_COPY_FILES += \
     frameworks/av/services/audiopolicy/config/usb_audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/usb_audio_policy_configuration.xml \
     $(LOCAL_PATH)/configs/audio/audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/audio_policy_configuration.xml
 
-# Bluetooth
+# Bluetooth — HAL HIDL 1.0 custom del common (enfoque Exynos7420).
 PRODUCT_PACKAGES += \
     android.hardware.bluetooth@1.0-impl.3475 \
     libbt-vendor
@@ -47,15 +38,11 @@ PRODUCT_PACKAGES += \
     android.hardware.camera.provider@2.4-impl-legacy \
     android.hardware.camera.provider@2.4-service
 
-# Configstore
-PRODUCT_PACKAGES += \
-    android.hardware.configstore@1.0-impl \
-    android.hardware.configstore@1.0-service
-
 # DRM
 PRODUCT_PACKAGES += \
     android.hardware.drm@1.0-impl \
-    android.hardware.drm@1.0-service
+    android.hardware.drm@1.0-service \
+    android.hardware.drm-service.clearkey
 
 # Flat device tree for boot image
 PRODUCT_HOST_PACKAGES += \
@@ -65,30 +52,27 @@ PRODUCT_HOST_PACKAGES += \
 PRODUCT_PACKAGES += \
     android.hardware.gnss@1.0-impl
 
-# TV Input
-PRODUCT_PACKAGES += \
-    android.hardware.tv.input@1.0
-
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/gps/gps.conf:system/etc/gps.conf \
     $(LOCAL_PATH)/configs/gps/gps.xml:system/etc/gps.xml
 
-# Graphics
+# Graphics — stack SLSI exynos5 legacy con adapters (receta 7420).
+# TODO(fase 2): validar compilación contra hardware/samsung_slsi actualizado.
 PRODUCT_PACKAGES += \
     libion \
     libfimg \
     android.hardware.graphics.allocator@2.0-impl \
     android.hardware.graphics.allocator@2.0-service \
     android.hardware.graphics.composer@2.1-impl \
-    android.hardware.graphics.mapper@2.0-impl \
+    android.hardware.graphics.mapper@2.0-impl-2.1 \
     libhwc2on1adapter
 
-# Health
+# Health 2.1
 PRODUCT_PACKAGES += \
-    android.hardware.health@2.0-impl \
-    android.hardware.health@2.0-service
+    android.hardware.health@2.1-impl \
+    android.hardware.health@2.1-service
 
-# Keymaster
+# Keymaster 3.0 + keystore TEE (blobs mobicore intactos)
 PRODUCT_PACKAGES += \
     keystore.exynos5 \
     android.hardware.keymaster@3.0-impl \
@@ -111,13 +95,15 @@ PRODUCT_COPY_FILES += \
 PRODUCT_PACKAGES += \
     android.hardware.memtrack@1.0-impl
 
-# Mobicore
+# Mobicore (TEE)
 PRODUCT_PACKAGES += \
     mcDriverDaemon \
     libMcClient \
     libMcRegistry
 
 # Power
+# TODO(fase 4): decidir entre power@1.0-service.exynos y
+# power-service.samsung-libperfmgr + powerhint.json (modelo 7420).
 PRODUCT_PACKAGES += \
     android.hardware.power@1.0-service.exynos
 
@@ -143,10 +129,6 @@ PRODUCT_PACKAGES += \
     init.wifi.rc \
     ueventd.universal3475.rc
 
-# RenderScript
-PRODUCT_PACKAGES += \
-    android.hardware.renderscript@1.0-impl
-
 # SamsungDoze
 PRODUCT_PACKAGES += \
     SamsungDoze
@@ -160,7 +142,7 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/seccomp/mediaextractor-seccomp.policy:$(TARGET_COPY_OUT_VENDOR)/etc/seccomp_policy/mediaextractor.policy \
     $(LOCAL_PATH)/seccomp/mediacodec-seccomp.policy:$(TARGET_COPY_OUT_VENDOR)/etc/seccomp_policy/mediacodec.policy
 
-# Sensors
+# Sensors / Vibrator
 PRODUCT_PACKAGES += \
     android.hardware.sensors@1.0-impl \
     android.hardware.vibrator@1.0-impl \
@@ -173,27 +155,16 @@ PRODUCT_PACKAGES += \
     libstagefright_shim \
     libui_shim
 
-# TextClassifier
-PRODUCT_PACKAGES += \
-    textclassifier.bundle1
-
-# Trust HAL
-PRODUCT_PACKAGES += \
-    vendor.lineage.trust@1.0-service
-
 # USB
 PRODUCT_PACKAGES += \
     android.hardware.usb@1.0-service.basic
 
-# Wi-Fi
+# Wi-Fi — bcmdhd + wpa_supplicant VER_0_8_X con interfaz HIDL (LOS 20).
 PRODUCT_PACKAGES += \
     macloader \
     wifiloader \
     hostapd \
     wificond \
-    wifilogd \
-    wlutil \
-    libwpa_client \
     wpa_supplicant \
     wpa_supplicant.conf \
     android.hardware.wifi@1.0-service \
@@ -205,8 +176,24 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/wifi/p2p_supplicant_overlay.conf:system/vendor/etc/wifi/p2p_supplicant_overlay.conf \
     $(LOCAL_PATH)/configs/wifi/wpa_supplicant_overlay.conf:system/vendor/etc/wifi/wpa_supplicant_overlay.conf
 
-# Properties
--include $(LOCAL_PATH)/system_prop.mk
+# Control groups y task profiles para kernels legacy (imprescindible en T;
+# referenciado por init de A13). Contenido orientado a kernel 3.10.
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/configs/cgroups.json:$(TARGET_COPY_OUT_VENDOR)/etc/cgroups.json \
+    $(LOCAL_PATH)/configs/task_profiles.json:$(TARGET_COPY_OUT_VENDOR)/etc/task_profiles.json
+
+# Particiones: dispositivo no-A/B legacy
+$(call inherit-product, $(SRC_TARGET_DIR)/product/non_ab_device.mk)
+
+# NOTA (eliminado respecto a 17.1):
+#   - props ro.secure=0 / ro.adb.secure=0 / ro.debuggable=1 (inseguras)
+#   - configstore (eliminado en A12; usar disable_configstore si hace falta)
+#   - renderscript HAL (deprecado en T)
+#   - textclassifier.bundle1
+#   - vendor.lineage.trust@1.0-service (retirado del árbol Lineage reciente;
+#     la entrada VINTF correspondiente quedó marcada TODO en manifest.xml)
+#   - tv.input
+#   - audio_policy.conf (formato muerto en T)
 
 # call Samsung LSI board support package
 $(call inherit-product, hardware/samsung_slsi/exynos5/exynos5.mk)

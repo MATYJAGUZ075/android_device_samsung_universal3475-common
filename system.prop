@@ -1,0 +1,26 @@
+# System properties comunes universal3475 (formato LOS20: system.prop,
+# consumido via TARGET_SYSTEM_PROP en BoardConfigCommon.mk).
+
+# Audio
+af.fast_track_multiplier=1
+audio_hal.force_voice_config=wide
+
+# Display
+ro.opengles.version=196610
+
+# HWC
+debug.sf.latch_unsignaled=1
+
+# Wi-Fi
+wifi.interface=wlan0
+wifi.direct.interface=p2p-dev-wlan0
+net.tethering.noprovisioning=true
+
+# Low RAM flag (1.5GB)
+ro.config.low_ram=true
+
+# Media
+debug.stagefright.ccodec=0
+
+# Network — initial receive window size in segments
+net.tcp.default_init_rwnd=60

@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2018 The LineageOS Project
+# Copyright (C) 2018-2026 The LineageOS Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ LOCAL_PATH := device/samsung/universal3475-common
 BUILD_TOP := $(shell pwd)
 
 BUILD_BROKEN_DUP_RULES := true
+# Los blobs legacy se copian como prebuilts product; necesario en T.
+BUILD_BROKEN_ELF_PREBUILT_PRODUCT_COPY_FILES := true
 
 # Include path
 TARGET_SPECIFIC_HEADER_PATH := $(LOCAL_PATH)/include
@@ -26,15 +28,14 @@ TARGET_SPECIFIC_HEADER_PATH := $(LOCAL_PATH)/include
 TARGET_NO_BOOTLOADER := true
 TARGET_NO_RADIOIMAGE := true
 
-# Platform
+# Platform (Exynos3475 — ARMv7 Cortex-A7, 32-bit puro)
 TARGET_BOARD_PLATFORM := exynos5
 TARGET_SLSI_VARIANT := bsp
 TARGET_SOC := exynos3475
 TARGET_BOOTLOADER_BOARD_NAME := universal3475
 BOARD_VENDOR := samsung
 
-# Binder
-#TARGET_USES_64_BIT_BINDER := true
+# Binder (32-bit only — no aplicar TARGET_USES_64_BIT_BINDER)
 
 # CPU
 TARGET_ARCH := arm
@@ -43,50 +44,56 @@ TARGET_CPU_ABI := armeabi-v7a
 TARGET_CPU_ABI2 := armeabi
 TARGET_CPU_VARIANT := cortex-a7
 
-# Audio
-USE_XML_AUDIO_POLICY_CONF := 1
-
-# Extracted with libbootimg
+# Extracted with libbootimg — modelo bootimg legacy del J2 SIN CAMBIOS:
+# zImage + DTB separado empaquetado con dtbhtoolExynos (igual que Exynos7420
+# en LOS 20/21).
 BOARD_CUSTOM_BOOTIMG := true
 BOARD_CUSTOM_BOOTIMG_MK := hardware/samsung/mkbootimg.mk
 BOARD_MKBOOTIMG_ARGS := --kernel_offset 0x00008000 --ramdisk_offset 0x01000000 --tags_offset 0x00000100
 BOARD_KERNEL_BASE := 0x10000000
 BOARD_KERNEL_PAGESIZE := 2048
 BOARD_KERNEL_IMAGE_NAME := zImage
-#BOARD_KERNEL_CMDLINE := The bootloader ignores the cmdline from the boot.img
+# BOARD_KERNEL_CMDLINE: el bootloader ignora el cmdline del boot.img
 BOARD_KERNEL_SEPARATED_DT := true
 TARGET_CUSTOM_DTBTOOL := dtbhtoolExynos
 BOARD_ROOT_EXTRA_FOLDERS += efs cpefs
 TARGET_FS_CONFIG_GEN := $(LOCAL_PATH)/config.fs
 
-# Kernel
+# Kernel (Linux 3.10.9 BSP Samsung)
 TARGET_KERNEL_ARCH := arm
-TARGET_KERNEL_CROSS_COMPILE_PREFIX := arm-eabi-
-KERNEL_TOOLCHAIN := $(BUILD_TOP)/prebuilts/gcc/$(HOST_OS)-x86/arm/arm-eabi-4.8/bin
 TARGET_LINUX_KERNEL_VERSION := 3.10
-
-# Kernel config
 TARGET_KERNEL_SOURCE := kernel/samsung/exynos3475
+# Compilación con clang moderno (referencia Exynos7420 LOS20: clang r416183b).
+# TODO(fase 1): ajustar versión de clang y completar backports (eBPF, binder
+# freezer, renameat2, shrinker). El defconfig actual aún es el de 17.1.
+TARGET_KERNEL_CLANG := true
+TARGET_KERNEL_CLANG_VERSION := r416183b
+TARGET_KERNEL_LLVM_BINUTILS := false
+TARGET_KERNEL_ADDITIONAL_FLAGS += \
+    HOSTCFLAGS="-fuse-ld=lld -Wno-unused-command-line-argument"
 
-# Use these flags if the board has a ext4 partition larger than 2gb
+# Filesystem
 BOARD_HAS_LARGE_FILESYSTEM := true
 TARGET_USERIMAGES_USE_EXT4 := true
 BOARD_CACHEIMAGE_FILE_SYSTEM_TYPE := ext4
 
-# Vendor separation
+# Vendor separation — validado viable en T por el porte Exynos7420.
 TARGET_COPY_OUT_VENDOR := system/vendor
 
 # Device Tree
 BOARD_USES_DT := true
 
+# VINTF — estrategia legacy: manifest target-level=3 (FCM R) con HALs HIDL.
+DEVICE_MANIFEST_FILE += device/samsung/j2lte/manifest.xml
+DEVICE_MATRIX_FILE += $(LOCAL_PATH)/compatibility_matrix.xml
+PRODUCT_ENFORCE_VINTF_MANIFEST_OVERRIDE := true
+
 # Graphics
 NUM_FRAMEBUFFER_SURFACE_BUFFERS := 3
 BOARD_USES_EXYNOS5_COMMON_GRALLOC := true
 
-# VR Front buffer
-#BOARD_USES_VR_FRONT_BUFFER := true
-
-# Samsung OpenMAX Video
+# Samsung OpenMAX (TODO fase 4: evaluar migración Codec2; flags conservados
+# porque los makefiles SLSI siguen consumiéndolos).
 BOARD_USE_STOREMETADATA := true
 BOARD_USE_METADATABUFFERTYPE := true
 BOARD_USE_DMA_BUF := true
@@ -111,17 +118,12 @@ BOARD_USE_SINGLE_PLANE_IN_DRM := false
 
 # HWComposer
 BOARD_USES_VPP := true
-#BOARD_USES_VPP_V2 := true // 8890 only
 BOARD_HDMI_INCAPABLE := true
 
 # Scalar
 BOARD_USES_SCALER := true
 
-# HWCServices - requires framework support
-#BOARD_USES_HWC_SERVICES := true
-
 # WiFiDisplay
-#BOARD_USES_VIRTUAL_DISPLAY := true - depends on platform changes
 BOARD_USES_VIRTUAL_DISPLAY_DECON_EXT_WB := false
 BOARD_USE_VIDEO_EXT_FOR_WFD_DRM := false
 BOARD_USES_VDS_BGRA8888 := true
@@ -141,17 +143,20 @@ BOARD_USES_SCALER_M2M1SHOT := true
 # Samsung HALs
 TARGET_AUDIOHAL_VARIANT := samsung
 TARGET_POWERHAL_VARIANT := samsung
+AUDIOSERVER_MULTILIB := 32
 
 # Sensors
 TARGET_NO_SENSOR_PERMISSION_CHECK := true
 
-# Wifi
+# Wifi — receta bcmdhd validada en LOS 20 por universal7420:
+# VER_0_8_X se mantiene, pero con la interfaz HIDL de wpa_supplicant.
 BOARD_WLAN_DEVICE := bcmdhd
 BOARD_HOSTAPD_DRIVER := NL80211
 BOARD_HOSTAPD_PRIVATE_LIB := lib_driver_cmd_bcmdhd
 BOARD_WPA_SUPPLICANT_DRIVER := NL80211
 BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_bcmdhd
 WPA_SUPPLICANT_VERSION := VER_0_8_X
+WPA_SUPPLICANT_USE_HIDL := true
 WIFI_BAND := 802_11_ABG
 WIFI_DRIVER_MODULE_ARG      := "firmware_path=/vendor/etc/wifi/bcmdhd_sta.bin nvram_path=/vendor/etc/wifi/nvram_net.txt"
 WIFI_DRIVER_MODULE_AP_ARG   := "firmware_path=/vendor/etc/wifi/bcmdhd_apsta.bin nvram_path=/vendor/etc/wifi/nvram_net.txt"
@@ -178,12 +183,23 @@ BACKLIGHT_PATH := "/sys/class/backlight/panel/brightness"
 TARGET_RECOVERY_FSTAB := $(LOCAL_PATH)/ramdisk/etc/fstab.universal3475
 
 # SELinux
-BOARD_SEPOLICY_DIRS += device/samsung/universal3475-common/sepolicy 
-BOARD_SEPOLICY_VERS := $(PLATFORM_SDK_VERSION).0
+# Estructura LOS20: policies del device en sepolicy/vendor.
+# TODO(fase 3+): nuncaallows de plataforma 33 sin resolver — durante el porte
+# se permite ignorarlos (mismo enfoque que Exynos7420) hasta endurecer.
+BOARD_VENDOR_SEPOLICY_DIRS += $(LOCAL_PATH)/sepolicy/vendor
+SELINUX_IGNORE_NEVERALLOWS := true
 
 # Soong namespaces
 PRODUCT_SOONG_NAMESPACES += $(LOCAL_PATH)
 
 # Shim
+# TODO(fase 4): revisar cuando se resuelva la migración media/Codec2.
 TARGET_LD_SHIM_LIBS += \
     /system/bin/mediaserver|/system/lib/libstagefright_shim.so
+
+# System properties comunes
+TARGET_SYSTEM_PROP += $(LOCAL_PATH)/system.prop
+
+# NOTA (eliminado respecto a 17.1):
+#   BOARD_SEPOLICY_DIRS / BOARD_SEPOLICY_VERS -> reemplazados por
+#   BOARD_VENDOR_SEPOLICY_DIRS (la versión se sigue a la plataforma T).

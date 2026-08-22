@@ -1,7 +1,12 @@
-# Android fstab file.
+# Android fstab file — universal3475 (LineageOS 20)
+# Cambios respecto a 17.1:
+#  - ELIMINADO el cifrado: FDE footer no es soportado en Android 13 y el
+#    kernel 3.10 no tiene FBE. /data se monta SIN cifrar (decisión del
+#    análisis, ver ANALISIS_LINEAGE20_REFERENCIAS.md).
+#  - Añadida entrada zram swap (patrón Exynos7420 LOS20).
+#
 # The filesystem that contains the filesystem checker binary (typically /system) cannot
 # specify MF_CHECK, and must come before any filesystems that do specify MF_CHECK
-# data partition must be located at the bottom for supporting device encryption
 
 #<src>                                                  <mnt_point> <type>  <mnt_flags and options>                                                         <fs_mgr_flags>
 /dev/block/platform/13540000.dwmmc0/by-name/SYSTEM      /system     ext4    ro,noatime,errors=panic,noload,block_validity                                   wait,recoveryonly
@@ -11,9 +16,12 @@
 /dev/block/platform/13540000.dwmmc0/by-name/CPEFS       /cpefs      ext4    nosuid,nodev,noatime,noauto_da_alloc,discard,journal_async_commit,errors=panic  wait,check
 /dev/block/platform/13540000.dwmmc0/by-name/EFS         /efs        ext4    nosuid,nodev,noatime,noauto_da_alloc,discard,journal_async_commit,errors=panic  wait,check
 /dev/block/platform/13540000.dwmmc0/by-name/CACHE       /cache      ext4    nosuid,nodev,noatime,noauto_da_alloc,discard,journal_async_commit,errors=panic  wait,check
-/dev/block/platform/13540000.dwmmc0/by-name/USERDATA    /data       ext4    nosuid,nodev,noatime,noauto_da_alloc,discard,journal_async_commit,errors=panic  wait,check,encryptable=footer
+/dev/block/platform/13540000.dwmmc0/by-name/USERDATA    /data       ext4    nosuid,nodev,noatime,noauto_da_alloc,discard,journal_async_commit,errors=panic  wait,check,latemount
 
-# VOLD
-/devices/13560000.dwmmc2/mmc_host/mmc*    auto    vfat    defaults    voldmanaged=sdcard1:auto,encryptable=userdata
+# VOLD (sdcard1 sin encryptable=userdata: cifrado removido)
+/devices/13560000.dwmmc2/mmc_host/mmc*    auto    vfat    defaults    voldmanaged=sdcard1:auto
 /devices/13510000.usb/usb*                auto    auto    defaults    voldmanaged=usb:auto
 /devices/13520000.usb/usb*                auto    auto    defaults    voldmanaged=usb:auto
+
+# ZRAM
+/dev/block/zram0                          none    swap    defaults    zramsize=536870912
