@@ -29,9 +29,13 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/audio/audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/audio_policy_configuration.xml
 
 # Bluetooth — HAL HIDL 1.0 custom del common (enfoque Exynos7420).
+# P-1 (22/08): libbt-vendor retirado del PRODUCT_PACKAGES — sin definición de
+# módulo ni blob verificable en el árbol/vendor. El impl.3475 lo carga por
+# dlopen en runtime (VENDOR_LIBRARY_NAME), no lo enlaza en build, así que el
+# build no se afecta; BT quedará inoperativo hasta la fase Bluetooth/vendor,
+# donde se localizará el .so y se agregará a proprietary-files.txt.
 PRODUCT_PACKAGES += \
-    android.hardware.bluetooth@1.0-impl.3475 \
-    libbt-vendor
+    android.hardware.bluetooth@1.0-impl.3475
 
 # Camera
 PRODUCT_PACKAGES += \
