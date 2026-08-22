@@ -149,11 +149,13 @@ PRODUCT_PACKAGES += \
     android.hardware.vibrator@1.0-service
 
 # Shims
+# FIX-002 (22/08): solo se declara libstagefright_shim, unico modulo con
+# definicion local (libshims/libstagefright). libcamera_client_shim,
+# libexynoscamera_shim y libui_shim no tienen fuente ni blob -> riesgo
+# "missing module". Las entradas LD_SHIM_LIBS asociadas quedan inoperativas
+# (config-only) hasta la fase camara/graficos.
 PRODUCT_PACKAGES += \
-    libcamera_client_shim \
-    libexynoscamera_shim \
-    libstagefright_shim \
-    libui_shim
+    libstagefright_shim
 
 # USB
 PRODUCT_PACKAGES += \
