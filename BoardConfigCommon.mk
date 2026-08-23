@@ -44,18 +44,18 @@ TARGET_CPU_ABI := armeabi-v7a
 TARGET_CPU_ABI2 := armeabi
 TARGET_CPU_VARIANT := cortex-a7
 
-# Extracted with libbootimg — modelo bootimg legacy del J2 SIN CAMBIOS:
-# zImage + DTB separado empaquetado con dtbhtoolExynos (igual que Exynos7420
-# en LOS 20/21).
+# Modelo bootimg del J2 (FIX-028): el kernel compila zImage-dtb
+# (CONFIG_BUILD_ARM_APPENDED_DTB_IMAGE=y, defconfig:530) => los DTB van
+# DENTRO del zImage. No hay dt.img separado ni dtbtool (eliminado de
+# lineage-20.0). mkbootimg.mk sigue usándose por SEANDROIDENFORCE.
 BOARD_CUSTOM_BOOTIMG := true
 BOARD_CUSTOM_BOOTIMG_MK := hardware/samsung/mkbootimg.mk
 BOARD_MKBOOTIMG_ARGS := --kernel_offset 0x00008000 --ramdisk_offset 0x01000000 --tags_offset 0x00000100
 BOARD_KERNEL_BASE := 0x10000000
 BOARD_KERNEL_PAGESIZE := 2048
-BOARD_KERNEL_IMAGE_NAME := zImage
+BOARD_KERNEL_IMAGE_NAME := zImage-dtb
 # BOARD_KERNEL_CMDLINE: el bootloader ignora el cmdline del boot.img
-BOARD_KERNEL_SEPARATED_DT := true
-TARGET_CUSTOM_DTBTOOL := dtbhtoolExynos
+BOARD_KERNEL_SEPARATED_DT := false
 BOARD_ROOT_EXTRA_FOLDERS += efs cpefs
 TARGET_FS_CONFIG_GEN := $(LOCAL_PATH)/config.fs
 
