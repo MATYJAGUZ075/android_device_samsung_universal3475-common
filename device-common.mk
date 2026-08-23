@@ -171,9 +171,11 @@ PRODUCT_PACKAGES += \
 # camera.vendor.exynos5.so tienen DT_NEEDED libstdc++.so (eliminada de
 # Android desde L); el shim provee operator new/delete, __cxa_pure_virtual
 # y stubs EHABI. vendor:true -> /vendor/lib, resoluble por los HAL 32-bit.
-# FIX-008/V-6 (23/08): libhardware_legacy minimal — gpsd (Exynos3475) tiene
-# DT_NEEDED libhardware_legacy.so (eliminada desde Q); auditoría UND completa
-# demostró que solo consume acquire_wake_lock/release_wake_lock de esa lib.
+# FIX-021: libhardware_legacy ya NO es shim propio — LineageOS lineage-20.0
+# mantiene hardware/libhardware_legacy (cc_library_shared vendor_available+VNDK)
+# con las mismas acquire/release_wake_lock que gpsd consume (auditoría UND
+# FIX-008). El PRODUCT_PACKAGES de abajo instala ahora el módulo upstream.
+# FIX-020: libhidltransport eliminada del BT HAL (fusionada en libhidlbase en R).
 PRODUCT_PACKAGES += \
     libstagefright_shim \
     libstdc++ \
