@@ -48,9 +48,11 @@ PRODUCT_PACKAGES += \
     android.hardware.drm@1.0-service \
     android.hardware.drm-service.clearkey
 
-# Flat device tree for boot image
-PRODUCT_HOST_PACKAGES += \
-    dtbhtoolExynos
+# Flat device tree for boot image — FIX-027: dtbhtoolExynos retirado de
+# HOST_PACKAGES: su fuente (system/tools/dtbtool) fue eliminada de
+# lineage-20.0 (404 verificado) y solo se definía bajo BUILD_TINY_ANDROID.
+# PENDIENTE separado: portar dtbtool/prebuilt para generar dt.img en bacon
+# (BOARD_CUSTOM_BOOTIMG_MK sigue activo en BoardConfigCommon.mk).
 
 # GPS
 PRODUCT_PACKAGES += \
