@@ -1,25 +1,27 @@
-# ORIGEN DE BLOBS [FASE 0 - INVESTIGAR]:
-# Todos los blobs no pineados provienen de SM-A510F stock (Exynos7580,
-# nougat) reutilizados por compatibilidad binaria con el 3475.
-# [7580-origin] = verificar antes de confiar en el porte a T.
+# RECONCILIADO V-3, 2026-08-23:
+# Base = inventario REAL de vendor_samsung/universal3475-common/proprietary
+# (monorepo Exynos3475/android_vendor_samsung lineage-17.1 @12a1fb3).
+# Eliminadas entradas Exynos7580/A510 ausentes del vendor.
+
 
 # aptX - from marlin - OPM1.171019.011
 lib/libaptX_encoder.so|984739a0bc968e18f75ced205733fe3f51c2d4f0
 
 # Camera
-lib/libhwjpeg.so # [7580-origin]
-lib/libuniplugin.so # [7580-origin]
-lib/libsensorlistener.so # [7580-origin]
+lib/libhwjpeg.so
 
 # GPS
 bin/gpsd:vendor/bin/gpsd
 bin/gps.cer:vendor/bin/gps.cer
-lib/hw/gps.default.so:lib/hw/gps.universal7580.so # [7580-origin]
-lib/libwrappergps.so # [7580-origin]
-lib/libfloatingfeature.so # [7580-origin]
+lib/hw/gps.universal3475.so # nombre real del blob; hw_get_module("gps") resuelve gps.$(ro.hardware)
+lib/libwrappergps.so
+lib/libfloatingfeature.so
+
+# Legacy runtime - DT_NEEDED de libsec-ril.so; sin fuente compartida en T
+lib/libstlport.so
 
 # Graphics
-vendor/lib/egl/libGLES_mali.so # [7580-origin] blob Mali - critico fase 2
+vendor/lib/egl/libGLES_mali.so
 
 # protobuf
 # precompiled from https://gitlab.com/Exynos7580/android_external_protobuf-compat-2.6
