@@ -158,8 +158,17 @@ PRODUCT_PACKAGES += \
 # libexynoscamera_shim y libui_shim no tienen fuente ni blob -> riesgo
 # "missing module". Las entradas LD_SHIM_LIBS asociadas quedan inoperativas
 # (config-only) hasta la fase camara/graficos.
+# V-7 (23/08): libstdc++ minimal — los blobs sensors.universal3475.so y
+# camera.vendor.exynos5.so tienen DT_NEEDED libstdc++.so (eliminada de
+# Android desde L); el shim provee operator new/delete, __cxa_pure_virtual
+# y stubs EHABI. vendor:true -> /vendor/lib, resoluble por los HAL 32-bit.
+# FIX-008/V-6 (23/08): libhardware_legacy minimal — gpsd (Exynos3475) tiene
+# DT_NEEDED libhardware_legacy.so (eliminada desde Q); auditoría UND completa
+# demostró que solo consume acquire_wake_lock/release_wake_lock de esa lib.
 PRODUCT_PACKAGES += \
-    libstagefright_shim
+    libstagefright_shim \
+    libstdc++ \
+    libhardware_legacy
 
 # USB
 PRODUCT_PACKAGES += \
