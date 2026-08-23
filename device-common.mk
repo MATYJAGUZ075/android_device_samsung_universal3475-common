@@ -68,7 +68,6 @@ PRODUCT_PACKAGES += \
     libfimg \
     android.hardware.graphics.allocator@2.0-impl \
     android.hardware.graphics.allocator@2.0-service \
-    android.hardware.graphics.composer@2.1-impl \
     android.hardware.graphics.composer@2.1-service \
     android.hardware.graphics.mapper@2.0-impl-2.1 \
     libhwc2on1adapter
@@ -80,13 +79,13 @@ PRODUCT_PACKAGES += \
 
 # Keymaster 3.0 + keystore TEE (blobs mobicore intactos)
 PRODUCT_PACKAGES += \
-    keystore.exynos5 \
+    keystore.exynos7570 \
     android.hardware.keymaster@3.0-impl \
     android.hardware.keymaster@3.0-service
 
-# Lights
-PRODUCT_PACKAGES += \
-    android.hardware.light@2.0-service.samsung
+# Lights — FIX-024: android.hardware.light@2.0-service.samsung NO existe en
+# hardware/samsung lineage-20 (sin dir lights). LIMITACIÓN: sin HAL de lights
+# hasta portar/crear uno (no crítico para boot).
 
 # Media
 PRODUCT_COPY_FILES += \
@@ -113,11 +112,9 @@ PRODUCT_PACKAGES += \
     libMcClient \
     libMcRegistry
 
-# Power
-# TODO(fase 4): decidir entre power@1.0-service.exynos y
-# power-service.samsung-libperfmgr + powerhint.json (modelo 7420).
-PRODUCT_PACKAGES += \
-    android.hardware.power@1.0-service.exynos
+# Power — FIX-024: power@1.0-service.exynos NO existe en LOS20 (verificado
+# org:LineageOS). LIMITACIÓN: sin HAL de power hasta decidir reemplazo
+# (p.ej. power-service.samsung-libperfmgr); no crítico para boot.
 
 # Permissions
 PRODUCT_COPY_FILES += \
