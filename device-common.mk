@@ -183,17 +183,22 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     android.hardware.usb@1.0-service.basic
 
-# Wi-Fi — bcmdhd + wpa_supplicant VER_0_8_X con interfaz HIDL (LOS 20).
+# Wi-Fi — bcmdhd (driver NL80211 en kernel) + supplicant/hostapd.
+# FIX-017: android.hardware.wifi@1.0-{service,impl} NO existen en
+# hardware/interfaces lineage-20.0 (solo definiciones .hal) -> eliminados
+# ("missing module" garantizado). Los servicios reales de LOS20 son AIDL y los
+# provee external/wpa_supplicant_8 (CONFIG_CTRL_IFACE_AIDL=y por defecto en
+# android.config), que instala sus propios VINTF fragments
+# (android.hardware.wifi.{hostapd,supplicant}.xml, fqname default).
+# LIMITACION CONOCIDA: sin HAL de chip (IWifiChip) el WiFi puede quedar no
+# funcional hasta una fase futura; igual que BT, no bloquea el build.
 PRODUCT_PACKAGES += \
     macloader \
     wifiloader \
     hostapd \
     wificond \
     wpa_supplicant \
-    wpa_supplicant.conf \
-    android.hardware.wifi@1.0-service \
-    android.hardware.wifi@1.0 \
-    android.hardware.wifi@1.0-impl
+    wpa_supplicant.conf
 
 # Wi-Fi Configs
 PRODUCT_COPY_FILES += \
