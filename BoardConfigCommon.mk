@@ -67,7 +67,7 @@ TARGET_KERNEL_SOURCE := kernel/samsung/exynos3475
 # TODO(fase 1): ajustar versión de clang y completar backports (eBPF, binder
 # freezer, renameat2, shrinker). El defconfig actual aún es el de 17.1.
 TARGET_KERNEL_CLANG := true
-TARGET_KERNEL_CLANG_VERSION := r416183b
+TARGET_KERNEL_CLANG_VERSION := r450784d
 TARGET_KERNEL_LLVM_BINUTILS := false
 TARGET_KERNEL_ADDITIONAL_FLAGS += \
     HOSTCFLAGS="-fuse-ld=lld -Wno-unused-command-line-argument"
