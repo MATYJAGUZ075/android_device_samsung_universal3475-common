@@ -54,6 +54,9 @@ BOARD_MKBOOTIMG_ARGS := --kernel_offset 0x00008000 --ramdisk_offset 0x01000000 -
 BOARD_KERNEL_BASE := 0x10000000
 BOARD_KERNEL_PAGESIZE := 2048
 BOARD_KERNEL_IMAGE_NAME := zImage-dtb
+# FIX-034: recovery.img excedía la partición en ~446KB con gzip; xz reduce
+# el ramdisk sustancialmente (soporte nativo build/make core/Makefile:894).
+BOARD_RAMDISK_USE_XZ := true
 # BOARD_KERNEL_CMDLINE: el bootloader ignora el cmdline del boot.img
 BOARD_KERNEL_SEPARATED_DT := false
 BOARD_ROOT_EXTRA_FOLDERS += efs cpefs
