@@ -88,7 +88,10 @@ BOARD_USES_DT := true
 
 # VINTF — estrategia legacy: manifest target-level=3 (FCM R) con HALs HIDL.
 DEVICE_MANIFEST_FILE += device/samsung/j2lte/manifest.xml
-DEVICE_MATRIX_FILE += $(LOCAL_PATH)/compatibility_matrix.xml
+# FIX-036: sin DEVICE_MATRIX_FILE propio -> libhidl usa su
+# device_compatibility_matrix.default.xml (la ruta con $(LOCAL_PATH)
+# resolvía contaminada a system/libhidl/vintfdata y rompía Ninja).
+# DEVICE_MANIFEST_FILE arriba sí usa ruta TOP-explícita.
 PRODUCT_ENFORCE_VINTF_MANIFEST_OVERRIDE := true
 
 # Graphics
