@@ -199,7 +199,8 @@ TARGET_LD_SHIM_LIBS += \
     /system/bin/mediaserver|/system/lib/libstagefright_shim.so
 
 # System properties comunes
-TARGET_SYSTEM_PROP += $(LOCAL_PATH)/system.prop
+# FIX-032: $(LOCAL_PATH) en contexto BoardConfig = build/make/core
+TARGET_SYSTEM_PROP += device/samsung/universal3475-common/system.prop
 
 # NOTA (eliminado respecto a 17.1):
 #   BOARD_SEPOLICY_DIRS / BOARD_SEPOLICY_VERS -> reemplazados por
