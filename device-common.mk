@@ -80,10 +80,9 @@ PRODUCT_PACKAGES += \
     android.hardware.health@2.1-service
 
 # Keymaster 3.0 + keystore TEE (blobs mobicore intactos)
-PRODUCT_PACKAGES += \
 # FIX-049: keystore.exynos7570 deshabilitado — libkeymaster/ver0 usa headers
-# legacy de Android 6-7 (log.h, keymaster0.h) inexistentes en lineage-20.0.
-# Se restaurará cuando se porte el HAL.
+# legacy de Android 6-7 inexistentes en lineage-20.0.
+PRODUCT_PACKAGES += \
     android.hardware.keymaster@3.0-impl \
     android.hardware.keymaster@3.0-service
 
