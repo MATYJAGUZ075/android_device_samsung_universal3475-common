@@ -57,6 +57,7 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE_CLASS := SHARED_LIBRARIES
 LOCAL_MODULE_SUFFIX := .so
 LOCAL_MODULE_PATH := \$(TARGET_OUT_VENDOR_SHARED_LIBRARIES)/egl
+LOCAL_SHARED_LIBRARIES := libbinder libcutils libhardware libion liblog libstdc++ libui libutils libz
 
 SYMLINKS := \$(TARGET_OUT)/vendor
 \$(SYMLINKS):
