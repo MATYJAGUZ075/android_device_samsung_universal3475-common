@@ -17,10 +17,10 @@ LOCAL_CFLAGS := -Wall -Werror
 
 LOCAL_MODULE := libsecnativefeature
 
-# Specs SELinux vendor (incl. /cpefs) por vía file_contexts.modules.tmp,
-# independiente de file_contexts.device.tmp: si device.tmp los trae, el
-# duplicado idéntico es legal (first-match); si viene vacío, esta vía los
-# aporta y e2fsdroid puede etiquetar /cpefs en system.img.
-LOCAL_FILE_CONTEXTS += $(LOCAL_PATH)/../sepolicy/vendor/file_contexts
+# Spec SELinux para /cpefs por vía file_contexts.modules.tmp, independiente
+# de file_contexts.device.tmp: usa el type de plataforma system_file (válido
+# en la policy de sistema que valida checkfc), no el type vendor sec_efs_file.
+# En runtime /cpefs queda tapado por el mount de la partición CPEFS (fstab).
+LOCAL_FILE_CONTEXTS += $(LOCAL_PATH)/../sepolicy/vendor/file_contexts_cpefs
 
 include $(BUILD_SHARED_LIBRARY)
