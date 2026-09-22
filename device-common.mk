@@ -231,3 +231,10 @@ $(call inherit-product, hardware/samsung_slsi/exynos3475/exynos3475.mk)
 
 # call the proprietary setup
 $(call inherit-product, vendor/samsung/universal3475-common/universal3475-common-vendor.mk)
+
+# Placeholder /cpefs para e2fsdroid (target_files/system.img): el dir debe
+# existir en el staging de SYSTEM para que aplique el selabel de config.fs
+# ([cpefs/] 0771 system:radio). En runtime queda tapado por el mount de la
+# partición CPEFS (fstab.universal3475). Archivo vacío: sin contenido EFS real.
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/configs/cpefs.placeholder:system/cpefs/.placeholder
