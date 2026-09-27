@@ -36,5 +36,10 @@ for t in 30 60 90 150 240 360 480; do
   /system/bin/ps -A > "/data/local/tmp/st_ps_$i.txt" 2>/dev/null
   /system/bin/getprop > "/data/local/tmp/st_prop_$i.txt" 2>/dev/null
   /system/bin/logcat -b crash -d -v threadtime > "/data/local/tmp/st_crash_$i.txt" 2>/dev/null
+  # Memoria: en un device de 892 MB es la variable critica. zygote pide
+  # -Xmx$(dalvik.vm.heapsize) y si no cabe lo mata el OOM killer (en silencio,
+  # porque el event file del LMK in-kernel no se puede abrir en este kernel).
+  grep -E 'MemTotal|MemFree|MemAvailable|SwapTotal|Slab|SReclaimable' /proc/meminfo \
+    > "/data/local/tmp/st_mem_$i.txt" 2>/dev/null
   i=$((i + 1))
 done
