@@ -260,3 +260,29 @@ $(call inherit-product, vendor/samsung/universal3475-common/universal3475-common
 # partición CPEFS (fstab.universal3475). Archivo vacío: sin contenido EFS real.
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/cpefs.placeholder:system/cpefs/.placeholder
+
+# ---------------------------------------------------------------------------
+# Diagnostico de arranque (opt-in)
+#
+# El device aun no completa el boot: zygote arranca y muere en silencio. Para
+# poder diagnosticar builds nuevas (incluidas las de CI) sin estar parcheando
+# el device a mano, los scripts de captura se instalan en la imagen, pero solo
+# si se pide explicitamente:
+#
+#   mka bacon LOS20_BOOT_DIAG=true
+#
+# Que escribe en /data/local/tmp (persiste tras warm reboot a recovery):
+#   bootlog.txt   captura continua de logcat (el flood de auditd en
+#                 permissive=1 rota el ring buffer, por eso es continua y no
+#                 un volcado puntual)
+#   st_ps_N.txt / st_prop_N.txt / st_crash_N.txt / st_bootN.txt
+#   zygote.out / zygote.err   salida de zygote
+#
+# TEMPORAL: poner a false (o no definir la variable) en builds de entrega.
+# ---------------------------------------------------------------------------
+ifeq ($(LOS20_BOOT_DIAG),true)
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/configs/diag/bootlog.sh:$(TARGET_COPY_OUT_SYSTEM)/bin/bootlog.sh \
+    $(LOCAL_PATH)/configs/init/bootlog.rc:$(TARGET_COPY_OUT_SYSTEM)/etc/init/bootlog.rc \
+    $(LOCAL_PATH)/configs/init/hw/zygote_diag.rc:$(TARGET_COPY_OUT_SYSTEM)/etc/init/hw/zygote_diag.rc
+endif

@@ -1,0 +1,8 @@
+# Diagnostico de arranque: captura continua de logcat desde class core.
+# Se instala solo con LOS20_BOOT_DIAG=true (ver device-common.mk).
+# TEMPORAL: dejar desactivado en builds de entrega.
+service bootlog /system/bin/bootlog.sh
+    class core
+    user root
+    group root
+    oneshot

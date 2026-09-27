@@ -1,0 +1,36 @@
+# Diagnostico: captura la salida de zygote, que al morir en silencio no deja ni
+# tombstone ni entrada en el buffer 'crash' (crash_dump no funciona en este
+# kernel 3.10; se ven los avisos minijail de crash_dump.*.policy).
+#
+# Este fichero DEBE instalarse en /system/etc/init/hw/ y no en
+# /system/etc/init/: el rc original esta en init/hw/init.zygote32.rc y AOSP
+# carga los ficheros de un subdirectorio de init/ en un subcontexto distinto.
+# Un "override" entre subcontextos distintos se descarta en silencio, por lo que
+# este override no tendria efecto desde /system/etc/init/.
+#
+# Copia fiel de init/hw/init.zygote32.rc + redirect_std{out,err} + override.
+# Se instala solo con LOS20_BOOT_DIAG=true (ver device-common.mk).
+# TEMPORAL: dejar desactivado en builds de entrega.
+service zygote /system/bin/app_process -Xzygote /system/bin --zygote --start-system-server
+    class main
+    priority -20
+    user root
+    group root readproc reserved_disk
+    socket zygote stream 660 root system
+    socket usap_pool_primary stream 660 root system
+    onrestart exec_background - system system -- /system/bin/vdc volume abort_fuse
+    onrestart write /sys/power/state on
+    # NOTE: If the wakelock name here is changed, then also
+    # update it in SystemSuspend.cpp
+    onrestart write /sys/power/wake_lock zygote_kwl
+    onrestart restart audioserver
+    onrestart restart cameraserver
+    onrestart restart media
+    onrestart restart media.tuner
+    onrestart restart netd
+    onrestart restart wificond
+    task_profiles ProcessCapacityHigh
+    critical window=${zygote.critical_window.minute:-off} target=zygote-fatal
+    redirect_stdout /data/local/tmp/zygote.out
+    redirect_stderr /data/local/tmp/zygote.err
+    override
