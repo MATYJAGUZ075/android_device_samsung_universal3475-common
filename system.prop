@@ -26,17 +26,26 @@ debug.stagefright.ccodec=0
 net.tcp.default_init_rwnd=60
 
 # ADB / USB
-# El kernel 3.10 del Exynos 3475 no tiene CONFIG_USB_FUNCTIONFS (esta
-# desactivado en el defconfig), asi que adbd no puede usar el modo FunctionFS
-# non-blocking. Sin esto adbd arranca pero nunca enumera, y el movil no aparece
-# por ADB durante el arranque de system (en TWRP si funciona porque usa su
-# propio entorno). ro.adb.nonblocking_ffs=0 desactiva ese camino y hace que
-# adbd use la API synchronous de FFS.
-# Comprobado: el defconfig de este kernel es practicamente identico al de
-# lineage-17.1, donde ADB si funciona, con estas mismas props.
+# ADVERTENCIA: estas props son de la era Android 12. En Android 13 adbd se movio
+# al APEX com.android.adbd y YA NO LAS LEE: el binario no contiene ni
+# "nonblocking_ffs" ni "ffs.aio_compat", y usa AIO de forma incondicional
+# (ScopedAioContext::Create). Medido en este device: con las cuatro props puestas
+# y cargadas, adbd arranca, FUNCTIONFS hace bind y el estado es mtp,adb, pero
+#
+#   UsbFfs: connection terminated: failed to submit read: Invalid argument
+#
+# En el kernel, aio_read() sobre un fichero sin soporte AIO hace el read
+# sincrono y, si devuelve 0 bytes, lo traduce a -EINVAL. El read de ep0 en
+# functionfs devuelve 0 cuando no hay paquete pendiente, de ahi el EINVAL, y adbd
+# destruye su propio transporte (el host ve el movil como "offline").
+#
+# Es decir: NO arreglan ADB en A13. Un fix real exige parche en adbd (tratar el
+# EINVAL como EAGAIN) o en el kernel (AIO en los endpoints de functionfs), no un
+# device tree. Se dejan porque son inocuas y hacen falta si alguna vez se vuelve
+# a A12, y persist.sys.usb.config si es la config USB por defecto que queremos.
 ro.adb.nonblocking_ffs=0
 persist.adb.nonblocking_ffs=0
-# Modo de compatibilidad AIO de FFS, necesario junto a lo anterior.
+# Modo de compatibilidad AIO de FFS (solo A12; ignorado por el adbd de A13).
 sys.usb.ffs.aio_compat=1
 # Configuracion USB por defecto: MTP + ADB.
 persist.sys.usb.config=mtp,adb
