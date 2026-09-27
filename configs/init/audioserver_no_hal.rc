@@ -34,6 +34,11 @@ service audioserver /system/bin/audioserver
     # onrestart restart audio_proxy_service
     # onrestart restart vendor.audio-hal-2-0
     # onrestart restart audio-hal-2-0
+    # Imprescindible: sin "override", init registra el servicio como duplicado
+    # y descarta esta definicion ("ignored duplicate definition"), con lo que el
+    # HAL de audio volveria a arrancar y a crash-loopear. El rc original esta
+    # en /system/etc/init (subcontexto ""), el mismo que este fichero.
+    override
 
 # FIX-034b: "start" del HAL neutralizados; "stop" y resto de logica intactos.
 on property:vts.native_server.on=1
