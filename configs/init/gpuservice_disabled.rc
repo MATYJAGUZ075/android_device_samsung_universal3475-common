@@ -1,0 +1,13 @@
+# FIX-034: gpuservice (frameworks/native, service "gpu") aborta en
+# libgpuwork.so BpfMap::BpfMap porque el kernel Exynos 3.10 no implementa
+# CONFIG_BPF_SYSCALL ("Function not implemented" leyendo /sys/fs/bpf). El
+# servicio es class core, asi que su crash-loop no bloquea el boot pero
+# genera tombstones en cada arranque. Se overridea aqui (keyword "override"
+# de init A13, mismo subcontext /system) para desactivarlo del class_start.
+service gpu /system/bin/gpuservice
+    class late_start
+    user gpu_service
+    group graphics readtracefs
+    disabled
+    oneshot
+    override

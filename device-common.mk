@@ -212,6 +212,13 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/cgroups.json:$(TARGET_COPY_OUT_VENDOR)/etc/cgroups.json \
     $(LOCAL_PATH)/configs/task_profiles.json:$(TARGET_COPY_OUT_VENDOR)/etc/task_profiles.json
 
+# FIX-034: override gpuservice.rc (service "gpu") para desactivarlo en
+# kernel 3.10 (sin CONFIG_BPF_SYSCALL -> abort en BpfMap::BpfMap).
+# Lleva "override" (init A13) y va al mismo subcontext /system que el
+# gpuservice.rc generado por Soong desde frameworks/native.
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/configs/init/gpuservice_disabled.rc:$(TARGET_COPY_OUT_SYSTEM)/etc/init/gpuservice_disabled.rc
+
 # Particiones: dispositivo no-A/B legacy
 $(call inherit-product, $(SRC_TARGET_DIR)/product/non_ab_device.mk)
 
