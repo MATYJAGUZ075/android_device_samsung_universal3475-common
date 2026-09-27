@@ -219,6 +219,16 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/init/gpuservice_disabled.rc:$(TARGET_COPY_OUT_SYSTEM)/etc/init/gpuservice_disabled.rc
 
+# FIX-034b: override del rc de android.hardware.audio.service (AIDL LOS20).
+# En kernel 3.10 solo existe /dev/binder; el main del HAL arranca threadpool
+# sobre /dev/vndbinder y luego llama a ABinderProcess_setThreadPoolMaxThreadCount,
+# que aborta con 'Binder threadpool cannot be shrunk after starting'
+# (crash-loop que impide completar el boot). Desactivado hasta rework del
+# HAL de audio. Override va al mismo subcontext /vendor que su rc original
+# (vendor.audio-hal), de ahí el TARGET_COPY_OUT_VENDOR.
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/configs/init/audio_hal_disabled.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/audio_hal_disabled.rc
+
 # Particiones: dispositivo no-A/B legacy
 $(call inherit-product, $(SRC_TARGET_DIR)/product/non_ab_device.mk)
 

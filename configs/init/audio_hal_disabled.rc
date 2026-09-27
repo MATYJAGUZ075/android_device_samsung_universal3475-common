@@ -1,0 +1,26 @@
+# FIX-034b: android.hardware.audio.service (AIDL) de LOS20.
+# El main (hardware/interfaces/audio/common/all-versions/default/service/service.cpp)
+# hace:
+#   ProcessState::initWithDriver("/dev/vndbinder");
+#   ProcessState::self()->startThreadPool();
+#   ABinderProcess_setThreadPoolMaxThreadCount(1);
+# En el kernel 3.10 del Exynos 3475 solo existe /dev/binder (no hay binderfs,
+# ni /dev/hwbinder ni /dev/vndbinder), por lo que la secuencia choca y aborta:
+#   Abort message: 'Binder threadpool cannot be shrunk after starting'
+# (ProcessState::setThreadPoolMaxThreadCount) -> crash-loop en cada arranque.
+# El servicio es class hal no-critico, pero su crash-loop impedía completar el
+# boot. Se replica aqui su definicion exacta anadiendo "disabled" y "override"
+# (keyword de init A13, mismo subcontext /vendor que el rc original).
+service vendor.audio-hal /vendor/bin/hw/android.hardware.audio.service
+    class hal
+    user audioserver
+    # media gid needed for /dev/fm (radio) and for /data/misc/media (tee)
+    group audio camera drmrpc inet media mediadrm net_bt net_bt_admin net_bw_acct wakelock context_hub
+    capabilities BLOCK_SUSPEND SYS_NICE
+    # setting RLIMIT_RTPRIO allows binder RT priority inheritance
+    rlimit rtprio 10 10
+    ioprio rt 4
+    task_profiles ProcessCapacityHigh HighPerformance
+    onrestart restart audioserver
+    disabled
+    override
