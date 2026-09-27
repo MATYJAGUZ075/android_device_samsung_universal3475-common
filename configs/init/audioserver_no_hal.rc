@@ -20,6 +20,28 @@
 # (stops, mkdir del socket, opciones del servicio).
 # "override" es el keyword de init A13; este rc se instala en el mismo
 # subcontext /system que el audioserver.rc original.
+#
+# MEDIDO con el kernel correcto ya flasheado (crash_dump funciona en ese kernel,
+# asi que si hay tombstones). El HAL sigue abortando aunque /dev/vndbinder exista:
+#
+#   signal 6 (SIGABRT)
+#   Abort message: 'Binder threadpool cannot be shrunk after starting'
+#     #03 android::ProcessState::setThreadPoolMaxThreadCount(unsigned int)
+#     #04 ABinderProcess_setThreadPoolMaxThreadCount
+#     #05 main+90  /vendor/bin/hw/android.hardware.audio.service
+#
+# La causa NO es la ausencia de /dev/vndbinder, sino el ORDEN de las llamadas
+# en el main del servicio:
+#
+#   ProcessState::initWithDriver("/dev/vndbinder");
+#   ProcessState::self()->startThreadPool();        // activa mThreadPoolStarted
+#   ABinderProcess_setThreadPoolMaxThreadCount(1);  // -> LOG_ALWAYS_FATAL
+#
+# startThreadPool() marca el pool como ya iniciado, y a la siguiente llamada la
+# detecta encogiendo el pool y aborta. El arreglo real es reordenar esas dos
+# lineas, pero el main vive en hardware/interfaces, no en el device tree. Hasta
+# entonces la cadena legacy (audio.primary) sigue funcionando con normalidad:
+# AudioFlinger carga el modulo primary y abre salida sin problema.
 service audioserver /system/bin/audioserver
     class core
     user audioserver
