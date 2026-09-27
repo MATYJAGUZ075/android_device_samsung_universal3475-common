@@ -168,10 +168,14 @@ PRODUCT_PACKAGES += \
 
 # Shims
 # FIX-002 (22/08): solo se declara libstagefright_shim, unico modulo con
-# definicion local (libshims/libstagefright). libcamera_client_shim,
-# libexynoscamera_shim y libui_shim no tienen fuente ni blob -> riesgo
-# "missing module". Las entradas LD_SHIM_LIBS asociadas quedan inoperativas
-# (config-only) hasta la fase camara/graficos.
+# definicion local que se construye (libshims/libstagefright).
+# libgpsd_shim tambien se declara (ver mas abajo, anadido en 5289e63): sin el,
+# /vendor/bin/gpsd no enlaza por createEventQueue(String8,int) y falla ~55
+# veces por arranque.
+#
+# libcamera_client_shim y libexynoscamera_shim SI tienen fuente en libshims/
+# pero no se declaran todavia: son modulos Android.mk y falta
+# libexynoscamera/MemoryHeapBase.cpp. Queda pendiente para la fase de camara.
 # FIX-022: libstdc++ ya NO es shim propio — bionic/libc de lineage-20.0
 # define cc_library "libstdc++" (vendor_available) con new.cpp,
 # __cxa_guard.cpp y __cxa_pure_virtual.cpp: cubre operadores, pure_virtual Y
@@ -224,21 +228,6 @@ PRODUCT_COPY_FILES += \
 # gpuservice.rc generado por Soong desde frameworks/native.
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/init/gpuservice_disabled.rc:$(TARGET_COPY_OUT_SYSTEM)/etc/init/gpuservice_disabled.rc
-
-# FIX-034b: el main de android.hardware.audio.service (LOS20) arranca un
-# threadpool sobre /dev/vndbinder y luego llama a
-# ABinderProcess_setThreadPoolMaxThreadCount. El Exynos 3475 con kernel 3.10
-# solo expone /dev/binder (no hay binderfs/hwbinder/vndbinder aunque
-# ueventd.rc los declare), la secuencia choca y el servicio aborta con
-# 'Binder threadpool cannot be shrunk after starting' -> crash-loop que
-# impide completar el boot.
-#
-# Marcar vendor.audio-hal como "disabled" NO basta: audioserver (class core)
-# lo relanza desde varios triggers y desde sus "onrestart". Se overridea
-# audioserver commenting las referencias de arranque del HAL. Override
-# (keyword de init A13) en el mismo subcontext /system que el original.
-PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/configs/init/audioserver_no_hal.rc:$(TARGET_COPY_OUT_SYSTEM)/etc/init/audioserver_no_hal.rc
 
 # Particiones: dispositivo no-A/B legacy
 $(call inherit-product, $(SRC_TARGET_DIR)/product/non_ab_device.mk)
