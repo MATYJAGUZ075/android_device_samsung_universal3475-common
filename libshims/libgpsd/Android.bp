@@ -1,0 +1,27 @@
+// Shim de simbolos para /vendor/bin/gpsd (blob GPS legacy de Samsung).
+//
+// gpsd llama a SensorManager::createEventQueue(String8, int), firma que
+// desaparecio en Android 12 (ahora lleva un tercer argumento attributionTag).
+// Sin este shim, el enlazado de gpsd falla en cada arranque con:
+//
+//   CANNOT LINK EXECUTABLE "/vendor/bin/gpsd": cannot locate symbol
+//   "_ZN7android13SensorManager16createEventQueueENS_7String8Ei"
+//
+// y como el servicio es reintentado continuamente, el error se repite ~55
+// veces por arranque. Se activa declarando el modulo en PRODUCT_PACKAGES y
+// anadiendo la entrada "/vendor/bin/gpsd|libgpsd_shim.so" a
+// TARGET_LD_SHIM_LIBS (ver BoardConfigCommon.mk).
+cc_library_shared {
+    name: "libgpsd_shim",
+
+    srcs: [
+        "SensorManager.cpp",
+    ],
+
+    shared_libs: [
+        "libsensor",
+        "libutils",
+    ],
+
+    vendor: true,
+}

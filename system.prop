@@ -24,3 +24,19 @@ debug.stagefright.ccodec=0
 
 # Network — initial receive window size in segments
 net.tcp.default_init_rwnd=60
+
+# ADB / USB
+# El kernel 3.10 del Exynos 3475 no tiene CONFIG_USB_FUNCTIONFS (esta
+# desactivado en el defconfig), asi que adbd no puede usar el modo FunctionFS
+# non-blocking. Sin esto adbd arranca pero nunca enumera, y el movil no aparece
+# por ADB durante el arranque de system (en TWRP si funciona porque usa su
+# propio entorno). ro.adb.nonblocking_ffs=0 desactiva ese camino y hace que
+# adbd use la API synchronous de FFS.
+# Comprobado: el defconfig de este kernel es practicamente identico al de
+# lineage-17.1, donde ADB si funciona, con estas mismas props.
+ro.adb.nonblocking_ffs=0
+persist.adb.nonblocking_ffs=0
+# Modo de compatibilidad AIO de FFS, necesario junto a lo anterior.
+sys.usb.ffs.aio_compat=1
+# Configuracion USB por defecto: MTP + ADB.
+persist.sys.usb.config=mtp,adb

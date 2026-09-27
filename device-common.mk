@@ -38,9 +38,14 @@ PRODUCT_PACKAGES += \
     android.hardware.bluetooth@1.0-impl.3475
 
 # Camera
+# camera.universal3475 es el wrapper local (camera/) que adapta el blob de
+# camara de Samsung a Camera2. Sin declararlo aqui nunca se construia, y sin
+# "vendor: true" en su Android.bp se instalaba en /system/lib/hw/ en vez de
+# /vendor/lib/hw/, donde si lo busca el provider vendor.
 PRODUCT_PACKAGES += \
     android.hardware.camera.provider@2.4-impl-legacy \
-    android.hardware.camera.provider@2.4-service
+    android.hardware.camera.provider@2.4-service \
+    camera.universal3475
 
 # DRM
 PRODUCT_PACKAGES += \
@@ -178,6 +183,7 @@ PRODUCT_PACKAGES += \
 # FIX-020: libhidltransport eliminada del BT HAL (fusionada en libhidlbase en R).
 PRODUCT_PACKAGES += \
     libstagefright_shim \
+    libgpsd_shim \
     libhardware_legacy
 
 # USB

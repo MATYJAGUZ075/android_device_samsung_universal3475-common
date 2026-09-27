@@ -200,9 +200,24 @@ SELINUX_IGNORE_NEVERALLOWS := true
 PRODUCT_SOONG_NAMESPACES += $(LOCAL_PATH)
 
 # Shim
-# TODO(fase 4): revisar cuando se resuelva la migración media/Codec2.
+# TARGET_LD_SHIM_LIBS es una TABLA DE REMAPEO con formato Oreo "original|shim"
+# (las entradas se separan por ':'). No es una lista de librerias obligatorias:
+# el shim solo hace falta si su entrada esta en la tabla, y el linker lo usa
+# para resolver "original" contra "shim".
+#
+# TODO(fase 4): revisar cuando se resuelva la migracion media/Codec2.
 TARGET_LD_SHIM_LIBS += \
     /system/bin/mediaserver|/system/lib/libstagefright_shim.so
+
+# /vendor/bin/gpsd es un blob pre-Android-12 que llama a la firma antigua de
+# SensorManager::createEventQueue(String8, int). A partir de A12 esa funcion
+# lleva un tercer argumento (attributionTag), con lo que el simbolo
+# _ZN7android13SensorManager16createEventQueueENS_7String8Ei ya no existe en
+# libsensor y el enlazado de gpsd falla de forma determinista en cada arranque
+# (~55 reintentos, uno cada 5 s). libshims/libgpsd reexporta ese simbolo
+# mangled y lo reenvia a la version actual con el attributionTag vacio.
+TARGET_LD_SHIM_LIBS += \
+    /vendor/bin/gpsd|libgpsd_shim.so
 
 # System properties comunes
 # FIX-032: $(LOCAL_PATH) en contexto BoardConfig = build/make/core

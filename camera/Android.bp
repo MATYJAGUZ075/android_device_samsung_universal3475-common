@@ -1,7 +1,15 @@
 cc_library_shared {
     name: "camera.universal3475",
     relative_install_path: "hw",
-    
+    // vendor: true es obligatorio. Sin esto el modulo se instala en
+    // /system/lib/hw/camera.universal3475.so, pero android.hardware.camera
+    // .provider@2.4-service corre como HAL vendor y busca el modulo en
+    // /vendor/lib/hw/. El resultado en el log es:
+    //   E HAL: load: module=/system/lib/hw/camera.universal3475.so
+    //   E CamProvider@2.4-impl.legacy: Could not load camera HAL module: -N
+    // (Invalid argument), y la camara no arranca.
+    vendor: true,
+
     srcs: [
         "CameraWrapper.cpp",
         "Camera2Wrapper.cpp",
