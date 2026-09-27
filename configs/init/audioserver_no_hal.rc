@@ -1,0 +1,87 @@
+# FIX-034b: evita el arranque del HAL de audio AIDL que crashea en kernel 3.10.
+#
+# android.hardware.audio.service (LOS20, hardware/interfaces/audio/common/
+# all-versions/default/service/service.cpp) hace:
+#   ProcessState::initWithDriver("/dev/vndbinder");
+#   ProcessState::self()->startThreadPool();
+#   ABinderProcess_setThreadPoolMaxThreadCount(1);
+#
+# El Exynos 3475 con kernel 3.10 solo expone /dev/binder (no hay binderfs,
+# ni /dev/hwbinder ni /dev/vndbinder aunque ueventd.rc los declare), por lo
+# que la secuencia choca y aborta de forma determinista:
+#   Abort message: 'Binder threadpool cannot be shrunk after starting'
+#   (android::ProcessState::setThreadPoolMaxThreadCount)
+#
+# Marcar vendor.audio-hal como "disabled" NO basta: audioserver (class core)
+# lo relanza explicitamente desde varios triggers y desde sus "onrestart",
+# provocando el crash-loop que impide completar el boot. Este fichero replica
+# la definicion de audioserver con TODAS las referencias de arranque del HAL
+# comentadas (onrestart + triggers "start"), dejando intacto el resto
+# (stops, mkdir del socket, opciones del servicio).
+# "override" es el keyword de init A13; este rc se instala en el mismo
+# subcontext /system que el audioserver.rc original.
+service audioserver /system/bin/audioserver
+    class core
+    user audioserver
+    # media gid needed for /dev/fm (radio) and for /data/misc/media (tee)
+    group audio camera drmrpc media mediadrm net_bt net_bt_admin net_bw_acct wakelock
+    capabilities BLOCK_SUSPEND
+    ioprio rt 4
+    task_profiles ProcessCapacityHigh HighPerformance
+    # FIX-034b: onrestart del HAL desactivados (comentados) para no relanzarlo.
+    # onrestart restart vendor.audio-hal
+    # onrestart restart vendor.audio-hal-4-0-msd
+    # onrestart restart audio_proxy_service
+    # onrestart restart vendor.audio-hal-2-0
+    # onrestart restart audio-hal-2-0
+    # Imprescindible: sin "override", init registra el servicio como duplicado
+    # y descarta esta definicion ("ignored duplicate definition"), con lo que el
+    # HAL de audio volveria a arrancar y a crash-loopear. El rc original esta
+    # en /system/etc/init (subcontexto ""), el mismo que este fichero.
+    override
+
+# FIX-034b: "start" del HAL neutralizados; "stop" y resto de logica intactos.
+on property:vts.native_server.on=1
+    stop audioserver
+on property:vts.native_server.on=0
+    start audioserver
+
+on property:init.svc.audioserver=stopped
+    stop vendor.audio-hal
+    stop vendor.audio-hal-4-0-msd
+    stop audio_proxy_service
+    # Keep the original service names for backward compatibility
+    stop vendor.audio-hal-2-0
+    stop audio-hal-2-0
+    # See b/155364397. Need to have HAL service running for VTS.
+    # start vendor.audio-hal
+    # start vendor.audio-hal-4-0-msd
+    # start audio_proxy_service
+    # start vendor.audio-hal-2-0
+    # start audio-hal-2-0
+
+on property:init.svc.audioserver=running
+    # start vendor.audio-hal
+    # start vendor.audio-hal-4-0-msd
+    # start audio_proxy_service
+    # start vendor.audio-hal-2-0
+    # start audio-hal-2-0
+
+on property:sys.audio.restart.hal=1
+    # See b/159966243. Avoid restart loop between audioserver and HAL.
+    # Keep the original service names for backward compatibility
+    stop vendor.audio-hal
+    stop vendor.audio-hal-4-0-msd
+    stop audio_proxy_service
+    stop vendor.audio-hal-2-0
+    stop audio-hal-2-0
+    # start vendor.audio-hal
+    # start vendor.audio-hal-4-0-msd
+    # start audio_proxy_service
+    # start vendor.audio-hal-2-0
+    # start audio-hal-2-0
+    # reset the property
+    setprop sys.audio.restart.hal 0
+
+on init
+    mkdir /dev/socket/audioserver 0775 audioserver audioserver
