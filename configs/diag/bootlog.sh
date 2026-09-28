@@ -41,5 +41,20 @@ for t in 30 60 90 150 240 360 480; do
   # porque el event file del LMK in-kernel no se puede abrir en este kernel).
   grep -E 'MemTotal|MemFree|MemAvailable|SwapTotal|Slab|SReclaimable' /proc/meminfo \
     > "/data/local/tmp/st_mem_$i.txt" 2>/dev/null
+  # dmesg: el ring buffer del kernel DEL ARRANQUE ACTUAL. Es la via directa
+  # para ver el kernel log, y no necesita pstore. Importa sobre todo porque
+  # el OOM killer loguea ahi, y zygote muere por SIGKILL sin dejar tombstone:
+  # si la causa es memoria, la linea aparecera en este fichero.
+  /system/bin/dmesg > "/data/local/tmp/st_dmesg_$i.txt" 2>/dev/null
+
+  # pstore: ramoops conserva la consola del kernel entre reinicios, pero
+  # /sys/fs/pstore NO viene montado en este device, asi que hay que montarlo a
+  # mano antes de copiar. Asi se recupera el kernel log de arranques anteriores.
+  mkdir -p /data/local/tmp/pstore 2>/dev/null
+  /system/bin/mount -t pstore pstore /sys/fs/pstore 2>/dev/null
+  for f in /sys/fs/pstore/*; do
+    [ -f "$f" ] || continue
+    cp "$f" "/data/local/tmp/pstore/st${i}_$(basename "$f")" 2>/dev/null
+  done
   i=$((i + 1))
 done
