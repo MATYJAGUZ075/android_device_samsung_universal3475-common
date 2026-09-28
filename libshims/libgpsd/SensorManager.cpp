@@ -32,9 +32,16 @@
 
 namespace android {
 
+// La funcion devuelve un tipo de C++ (sp<SensorEventQueue>) pero hay que
+// exportarla con enlace C, porque el nombre del simbolo que gpsd busca es el
+// mangled de esa firma concreta. El compilador protesta con
+// -Werror=return-type-c-linkage, asi que se silencia justo en esta declaracion.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreturn-type-c-linkage"
 extern "C" sp<SensorEventQueue> _ZN7android13SensorManager16createEventQueueENS_7String8Ei(
         SensorManager* manager, String8 packageName, int mode) {
     return manager->createEventQueue(packageName, mode, String16(""));
 }
+#pragma clang diagnostic pop
 
 } // namespace android
