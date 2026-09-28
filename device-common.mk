@@ -140,11 +140,26 @@ PRODUCT_PACKAGES += \
 # Solución: el HAL de power AIDL de Samsung, que sí existe en la rama lineage-20
 # de hardware/samsung (aidl/power-libperfmgr). Trae su propio fragment VINTF
 # con override="true", que sustituye la declaración HIDL.
-PRODUCT_PACKAGES += \
-    android.hardware.power-service.samsung-libperfmgr
-
-PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/configs/power/powerhint.json:$(TARGET_COPY_OUT_VENDOR)/etc/powerhint.json
+# NO se anade android.hardware.power-service.samsung-libperfmgr.
+# Se descarto tras verificar que es inconstruible en A13: su Android.bp declara
+#   shared_libs: [... "libperfmgr" "pixel-power-ext-V1-ndk"]
+# y 'libperfmgr' ya no existe en AOSP (system/core/libperfmgr se elimino en
+# Android 12; 404 tanto en lineage-20.0 como en android13-release). El resultado
+# del build es:
+#   warning: lineage_j2lte.mk includes non-existent modules in PRODUCT_PACKAGES
+#   Offending entries: android.hardware.power-service.samsung-libperfmgr
+#   error: Build failed.  (run 36367954675)
+#
+# Sin HAL de power el sistema ARRANCA: verificado on-device, system_server
+# llega a 'Entered the Android system server!' y completa el arranque. Lo que se
+# pierde es gestion de energia real: el governor se queda en 'interactive' sin
+# limites fijados por powerhint.json, y no hay suspension.
+#
+# Para recuperarlo habria que portar 'libperfmgr' a A13 o escribir un HAL de
+# power AIDL minimo sin esa dependencia. Es trabajo de framework, no de device
+# tree. La declaracion HIDL power@1.0 del manifest sigue eliminada (ver commit
+# en device/samsung/j2lte), porque declararla sin implementacion es lo que
+# provocaba el bloqueo infinito de PowerManagerService.
 
 # Permissions
 PRODUCT_COPY_FILES += \
