@@ -49,3 +49,29 @@ persist.adb.nonblocking_ffs=0
 sys.usb.ffs.aio_compat=1
 # Configuracion USB por defecto: MTP + ADB.
 persist.sys.usb.config=mtp,adb
+
+# ART JIT
+# dalvik.vm.usejit=false y usejitprofiles=false (FIX-036).
+#
+# El kernel 3.10 del Exynos 3475 no tiene memfd_create(): el mecanismo de
+# memoria de A13 es memfd y no el ashmem antiguo. Medido:
+#   I zygote: memfd_create failed: Function not implemented, no memfd support
+#   W system_server: Could not create private region after zygote fork:
+#     Failed to initialize dual view JIT. memfd_create() error: Function not implemented
+#
+# Sin memfd_create, ART no puede inicializar el JIT dual-view y el hilo del pool
+# de JIT revienta con SIGSEGV. Con crash_dump ya funcionando (kernel con vndbinder
+# y ramoops) se obtiene el tombstone, 11 veces por arranque:
+#   Fatal signal 11 (SIGSEGV), code 1 (SEGV_MAPERR), fault addr 0x4
+#     in tid ... (Jit thread pool), pid ... (system_server)
+#   I Zygote: Process ... exited due to signal 11 (Segmentation fault)
+#
+# system_server muere por SIGSEGV en el JIT, no por ANR ni por OOM, asi que
+# zygote reinicia cada ~14 s y nunca se llega a boot_completed. Con el JIT
+# desactivado ART interpreta en vez de compilar, que es lento pero estable en un
+# Cortex-A7.
+#
+# Coste: el rendimiento del interprete es notable. Es la unica via sin tocar el
+# kernel; la alternativa seria backportar memfd_create a este 3.10.
+dalvik.vm.usejit=false
+dalvik.vm.usejitprofiles=false
