@@ -186,6 +186,17 @@ PRODUCT_PACKAGES += \
     libgpsd_shim \
     libhardware_legacy
 
+# netd: rompe el bucle que mataba a zygote (FIX-035).
+# En kernel 3.10 netd muere con exit(1) porque libnetd_updatable_init carga
+# programas BPF y no los hay (ENOSYS). Al morir, su 'onrestart restart zygote'
+# hacia que init mandara SIGKILL a zygote, y el onrestart de zygote reiniciaba
+# netd: bucle infinito cada ~5 s. zygote no tenia problema propio.
+# Se overridea netd quitando esas dos lineas de onrestart. Se pierde DNS y
+# firewall; el arreglo real (netd tolerante a la ausencia de BPF) es un parche
+# en system/netd.
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/configs/init/netd_no_zygote_restart.rc:$(TARGET_COPY_OUT_SYSTEM)/etc/init/netd_no_zygote_restart.rc
+
 # USB
 PRODUCT_PACKAGES += \
     android.hardware.usb@1.0-service.basic
