@@ -120,9 +120,31 @@ PRODUCT_PACKAGES += \
     libMcClient \
     libMcRegistry
 
-# Power — FIX-024: power@1.0-service.exynos NO existe en LOS20 (verificado
-# org:LineageOS). LIMITACIÓN: sin HAL de power hasta decidir reemplazo
-# (p.ej. power-service.samsung-libperfmgr); no crítico para boot.
+# Power — FIX-035: esto SÍ era crítico para boot, contra lo que decía el
+# comentario anterior de FIX-024.
+#
+# El manifest declaraba android.hardware.power@1.0 (HIDL) pero no había ningún
+# HAL: power@1.0-service.exynos no existe en LOS20. Con el manifest declarando
+# el HAL y sin implementación, PowerManagerService.nativeInit() se quedaba
+# esperando para siempre. Medido en el ANR de system_server:
+#
+#   #05 android::hardware::details::Waiter::wait(bool)
+#   #06 android::hardware::details::getRawServiceInternal(...)
+#   #08 android::hardware::power::V1_0::IPower::getService(...)
+#   #10 android::power::PowerHalLoader::loadHidlV1_0Locked()
+#   at com.android.server.power.PowerManagerService.nativeInit(Native method)
+#
+# -> Watchdog WAITED_HALF -> ANR -> reinicio de zygote, en bucle. El sistema
+# nunca llegaba a boot_completed y se quedaba en la animación de arranque.
+#
+# Solución: el HAL de power AIDL de Samsung, que sí existe en la rama lineage-20
+# de hardware/samsung (aidl/power-libperfmgr). Trae su propio fragment VINTF
+# con override="true", que sustituye la declaración HIDL.
+PRODUCT_PACKAGES += \
+    android.hardware.power-service.samsung-libperfmgr
+
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/configs/power/powerhint.json:$(TARGET_COPY_OUT_VENDOR)/etc/powerhint.json
 
 # Permissions
 PRODUCT_COPY_FILES += \
