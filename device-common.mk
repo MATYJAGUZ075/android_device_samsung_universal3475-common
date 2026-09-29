@@ -302,6 +302,7 @@ PRODUCT_COPY_FILES += \
 # (keyword de init A13) en el mismo subcontext /system que el original.
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/init/audioserver_no_hal.rc:$(TARGET_COPY_OUT_SYSTEM)/etc/init/audioserver_no_hal.rc
+    $(LOCAL_PATH)/configs/init/audio_hal_disabled.rc:$(TARGET_COPY_OUT_SYSTEM)/etc/init/audio_hal_disabled.rc
 
 # Particiones: dispositivo no-A/B legacy
 $(call inherit-product, $(SRC_TARGET_DIR)/product/non_ab_device.mk)

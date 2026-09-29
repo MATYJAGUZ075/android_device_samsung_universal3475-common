@@ -1,0 +1,19 @@
+# Deshabilita HAL de audio AIDL que crashea: 'Could not register Audio Core API'
+# override + disabled = init ignora el servicio original
+service android.hardware.audio.service /vendor/bin/hw/android.hardware.audio.service
+    class hal
+    hwbinder
+    user audio
+    group audio readproc
+    capabilities BINDER_IPC NET_BIND_SERVICE
+    disabled
+    override
+
+# También el service manager de audio si existe
+service android.hardware.audio@6.0-service /vendor/bin/hw/android.hardware.audio@6.0-service
+    class hal
+    hwbinder
+    user audio
+    group audio
+    disabled
+    override
