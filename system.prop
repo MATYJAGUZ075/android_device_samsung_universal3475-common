@@ -1,5 +1,4 @@
 # ADB TCP para diagnóstico post-boot
-ro.adb.secure=0
 ro.debuggable=1
 persist.adb.tcp.port=5555
 persist.sys.usb.config=adb
