@@ -84,3 +84,13 @@ LOCAL_SRC_FILES		:= ../configs/init/audio_hal_disabled.rc
 LOCAL_MODULE_PATH	:= $(TARGET_OUT)/etc/init
 include $(BUILD_PREBUILT)
 
+
+# netd.rc - fix netd loop (elimina onrestart restart zygote, añade oneshot)
+include $(CLEAR_VARS)
+LOCAL_MODULE		:= netd.rc
+LOCAL_MODULE_TAGS	:= optional
+LOCAL_MODULE_CLASS	:= ETC
+LOCAL_SRC_FILES		:= ../configs/init/netd.rc
+LOCAL_MODULE_PATH	:= $(TARGET_OUT)/etc/init
+include $(BUILD_PREBUILT)
+

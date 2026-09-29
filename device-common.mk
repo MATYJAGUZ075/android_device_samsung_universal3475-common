@@ -212,7 +212,6 @@ PRODUCT_PACKAGES += \
     libhardware_legacy
 # netd: rompe el bucle que mataba a zygote (FIX-035).
 PRODUCT_COPY_FILES += 
-    $(LOCAL_PATH)/configs/init/netd.rc:$(TARGET_COPY_OUT_SYSTEM)/etc/init/netd.rc
 # En kernel 3.10 netd muere con exit(1) porque libnetd_updatable_init carga
 # programas BPF y no los hay (ENOSYS). Al morir, su 'onrestart restart zygote'
 # hacia que init mandara SIGKILL a zygote, y el onrestart de zygote reiniciaba
