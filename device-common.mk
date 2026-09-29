@@ -204,11 +204,23 @@ PRODUCT_PACKAGES += \
     android.hardware.vibrator@1.0-service
 
 # Shims
-# FIX-002 (22/08): solo se declara libstagefright_shim, unico modulo con
-# definicion local (libshims/libstagefright). libcamera_client_shim,
-# libexynoscamera_shim y libui_shim no tienen fuente ni blob -> riesgo
-# "missing module". Las entradas LD_SHIM_LIBS asociadas quedan inoperativas
-# (config-only) hasta la fase camara/graficos.
+# FIX-036 (29/09): revierte FIX-002 para libcamera_client_shim.
+# El comentario de FIX-002 ("no tienen fuente ni blob -> missing module") era
+# incorrecto: libshims/libcamera_client SI tiene fuente (CameraParameters.cpp +
+# CameraParameters.h) y se compila sin problema. Al excluirlo de
+# PRODUCT_PACKAGES la build NUNCA lo empaqueta en /vendor/lib, pero el linker
+# si lo exige en tiempo de arranque:
+#   F linker: CANNOT LINK EXECUTABLE "/system/bin/bootanimation":
+#     library "/vendor/lib/libcamera_client_shim.so" not found:
+#     needed by /system/lib/libcamera_client.so in namespace (default)
+# Eso tumba app_process (=> zygote no arranca, init.svc.zygote=restarting),
+# bootanimation (=> sin animacion de arranque), audioserver, mediaserver,
+# cameraserver y mediaextractor. Es el bloqueo del arranque, no el HAL de audio.
+# El shim aporta las constantes CameraParameters que los blobs de camara de
+# Samsung necesitan y que la libcamera_client de AOSP no define (PHASE_AF,
+# RT_HDR, METERING_CENTER, DYNAMIC_RANGE_CONTROL, PIXEL_FORMAT_YUV420SP_NV21,
+# EFFECT_CARTOONIZE, ...). Sin el, el blob de camara no puede resolverlas.
+# Siguen fuera libexynoscamera_shim y libui_shim: siguen sin fuente.
 # FIX-022: libstdc++ ya NO es shim propio — bionic/libc de lineage-20.0
 # define cc_library "libstdc++" (vendor_available) con new.cpp,
 # __cxa_guard.cpp y __cxa_pure_virtual.cpp: cubre operadores, pure_virtual Y
@@ -220,6 +232,7 @@ PRODUCT_PACKAGES += \
 # FIX-020: libhidltransport eliminada del BT HAL (fusionada en libhidlbase en R).
 PRODUCT_PACKAGES += \
     libstagefright_shim \
+    libcamera_client_shim \
     libgpsd_shim \
     libhardware_legacy
 
