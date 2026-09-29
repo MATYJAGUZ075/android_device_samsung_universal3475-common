@@ -74,3 +74,13 @@ LOCAL_SRC_FILES		:= etc/ueventd.universal3475.rc
 LOCAL_MODULE_PATH	:= $(TARGET_ROOT_OUT)
 include $(BUILD_PREBUILT)
 
+
+# audio_hal_disabled.rc - deshabilita HAL de audio AIDL que crashea
+include $(CLEAR_VARS)
+LOCAL_MODULE		:= audio_hal_disabled.rc
+LOCAL_MODULE_TAGS	:= optional
+LOCAL_MODULE_CLASS	:= ETC
+LOCAL_SRC_FILES		:= ../configs/init/audio_hal_disabled.rc
+LOCAL_MODULE_PATH	:= $(TARGET_OUT)/etc/init
+include $(BUILD_PREBUILT)
+
