@@ -13,11 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 LOCAL_PATH := device/samsung/universal3475-common
-
 DEVICE_PACKAGE_OVERLAYS += $(LOCAL_PATH)/overlay
-
 # Audio policy XML (formato moderno; el .conf legacy ya no se copia en T).
 # TODO(fase 4): regenerar audio_policy_configuration.xml a version 7.0.
 PRODUCT_COPY_FILES += \
@@ -27,7 +24,6 @@ PRODUCT_COPY_FILES += \
     frameworks/av/services/audiopolicy/config/r_submix_audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/r_submix_audio_policy_configuration.xml \
     frameworks/av/services/audiopolicy/config/usb_audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/usb_audio_policy_configuration.xml \
     $(LOCAL_PATH)/configs/audio/audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/audio_policy_configuration.xml
-
 # Bluetooth — HAL HIDL 1.0 custom del common (enfoque Exynos7420).
 # P-1 (22/08): libbt-vendor retirado del PRODUCT_PACKAGES — sin definición de
 # módulo ni blob verificable en el árbol/vendor. El impl.3475 lo carga por
@@ -36,7 +32,6 @@ PRODUCT_COPY_FILES += \
 # donde se localizará el .so y se agregará a proprietary-files.txt.
 PRODUCT_PACKAGES += \
     android.hardware.bluetooth@1.0-impl.3475
-
 # Camera
 # camera.universal3475 es el wrapper local (camera/) que adapta el blob de
 # camara de Samsung a Camera2. Sin declararlo aqui nunca se construia, y sin
@@ -46,28 +41,23 @@ PRODUCT_PACKAGES += \
     android.hardware.camera.provider@2.4-impl-legacy \
     android.hardware.camera.provider@2.4-service \
     camera.universal3475
-
 # DRM
 PRODUCT_PACKAGES += \
     android.hardware.drm@1.0-impl \
     android.hardware.drm@1.0-service \
     android.hardware.drm-service.clearkey
-
 # Flat device tree for boot image — FIX-027: dtbhtoolExynos retirado de
 # HOST_PACKAGES: su fuente (system/tools/dtbtool) fue eliminada de
 # lineage-20.0 (404 verificado) y solo se definía bajo BUILD_TINY_ANDROID.
 # PENDIENTE separado: portar dtbtool/prebuilt para generar dt.img en bacon
 # (BOARD_CUSTOM_BOOTIMG_MK sigue activo en BoardConfigCommon.mk).
-
 # GPS
 PRODUCT_PACKAGES += \
     android.hardware.gnss@1.0-impl \
     android.hardware.gnss@1.0-service
-
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/gps/gps.conf:system/etc/gps.conf \
     $(LOCAL_PATH)/configs/gps/gps.xml:system/etc/gps.xml
-
 # Graphics — stack SLSI exynos5 legacy con adapters (receta 7420).
 # TODO(fase 2): validar compilación contra hardware/samsung_slsi actualizado.
 PRODUCT_PACKAGES += \
@@ -78,23 +68,19 @@ PRODUCT_PACKAGES += \
     android.hardware.graphics.composer@2.1-service \
     android.hardware.graphics.mapper@2.0-impl-2.1 \
     libhwc2on1adapter
-
 # Health 2.1
 PRODUCT_PACKAGES += \
     android.hardware.health@2.1-impl \
     android.hardware.health@2.1-service
-
 # Keymaster 3.0 + keystore TEE (blobs mobicore intactos)
 # FIX-049: keystore.exynos7570 deshabilitado — libkeymaster/ver0 usa headers
 # legacy de Android 6-7 inexistentes en lineage-20.0.
 PRODUCT_PACKAGES += \
     android.hardware.keymaster@3.0-impl \
     android.hardware.keymaster@3.0-service
-
 # Lights — FIX-024: android.hardware.light@2.0-service.samsung NO existe en
 # hardware/samsung lineage-20 (sin dir lights). LIMITACIÓN: sin HAL de lights
 # hasta portar/crear uno (no crítico para boot).
-
 # Media
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/media/media_codecs.xml:$(TARGET_COPY_OUT_VENDOR)/etc/media_codecs.xml \
@@ -103,23 +89,19 @@ PRODUCT_COPY_FILES += \
     frameworks/av/media/libstagefright/data/media_codecs_google_audio.xml:$(TARGET_COPY_OUT_VENDOR)/etc/media_codecs_google_audio.xml \
     frameworks/av/media/libstagefright/data/media_codecs_google_telephony.xml:$(TARGET_COPY_OUT_VENDOR)/etc/media_codecs_google_telephony.xml \
     frameworks/av/media/libstagefright/data/media_codecs_google_video.xml:$(TARGET_COPY_OUT_VENDOR)/etc/media_codecs_google_video_le.xml
-
 # OMX service (implementa android.hardware.media.omx@1.0 declarado en
 # manifest.xml; modulo en frameworks/av services/mediacodec, vendor 32-bit)
 PRODUCT_PACKAGES += \
     android.hardware.media.omx@1.0-service
-
 # Memory
 PRODUCT_PACKAGES += \
     android.hardware.memtrack@1.0-impl \
     android.hardware.memtrack@1.0-service
-
 # Mobicore (TEE)
 PRODUCT_PACKAGES += \
     mcDriverDaemon \
     libMcClient \
     libMcRegistry
-
 # Power — FIX-035: esto SÍ era crítico para boot, contra lo que decía el
 # comentario anterior de FIX-024.
 #
@@ -160,7 +142,6 @@ PRODUCT_PACKAGES += \
 # tree. La declaracion HIDL power@1.0 del manifest sigue eliminada (ver commit
 # en device/samsung/j2lte), porque declararla sin implementacion es lo que
 # provocaba el bloqueo infinito de PowerManagerService.
-
 # Permissions
 PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.camera.front.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.camera.front.xml \
@@ -170,7 +151,6 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.usb.host.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.usb.host.xml \
     frameworks/native/data/etc/android.hardware.wifi.direct.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.wifi.direct.xml \
     frameworks/native/data/etc/android.hardware.wifi.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.wifi.xml
-
 # ramdisk
 PRODUCT_PACKAGES += \
     init.power.rc \
@@ -182,27 +162,22 @@ PRODUCT_PACKAGES += \
     init.recovery.universal3475.rc \
     init.wifi.rc \
     ueventd.universal3475.rc
-
 # SamsungDoze
 PRODUCT_PACKAGES += \
     SamsungDoze
-
 # SEC
 PRODUCT_PACKAGES += \
     libsecnativefeature
-
 # Seccomp filters
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/seccomp/mediaextractor-seccomp.policy:$(TARGET_COPY_OUT_VENDOR)/etc/seccomp_policy/mediaextractor.policy \
     $(LOCAL_PATH)/seccomp/mediacodec-seccomp.policy:$(TARGET_COPY_OUT_VENDOR)/etc/seccomp_policy/mediacodec.policy
-
 # Sensors / Vibrator
 PRODUCT_PACKAGES += \
     android.hardware.sensors@1.0-impl \
     android.hardware.sensors@1.0-service \
     android.hardware.vibrator@1.0-impl \
     android.hardware.vibrator@1.0-service
-
 # Shims
 # FIX-036 (29/09): revierte FIX-002 para libcamera_client_shim.
 # El comentario de FIX-002 ("no tienen fuente ni blob -> missing module") era
@@ -235,7 +210,6 @@ PRODUCT_PACKAGES += \
     libcamera_client_shim \
     libgpsd_shim \
     libhardware_legacy
-
 # netd: rompe el bucle que mataba a zygote (FIX-035).
 PRODUCT_COPY_FILES += 
     $(LOCAL_PATH)/configs/init/netd.rc:$(TARGET_COPY_OUT_SYSTEM)/etc/init/netd.rc
@@ -248,11 +222,9 @@ PRODUCT_COPY_FILES +=
 # en system/netd.
 PRODUCT_COPY_FILES += \
 ##      $(LOCAL_PATH)/configs/init/netd_no_zygote_restart.rc:$(TARGET_COPY_OUT_SYSTEM)/etc/init/netd_no_zygote_restart.rc
-
 # USB
 PRODUCT_PACKAGES += \
     android.hardware.usb@1.0-service.basic
-
 # Wi-Fi — bcmdhd (driver NL80211 en kernel) + supplicant/hostapd.
 # FIX-017: android.hardware.wifi@1.0-{service,impl} NO existen en
 # hardware/interfaces lineage-20.0 (solo definiciones .hal) -> eliminados
@@ -269,25 +241,21 @@ PRODUCT_PACKAGES += \
     wificond \
     wpa_supplicant \
     wpa_supplicant.conf
-
 # Wi-Fi Configs
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/wifi/p2p_supplicant_overlay.conf:system/vendor/etc/wifi/p2p_supplicant_overlay.conf \
     $(LOCAL_PATH)/configs/wifi/wpa_supplicant_overlay.conf:system/vendor/etc/wifi/wpa_supplicant_overlay.conf
-
 # Control groups y task profiles para kernels legacy (imprescindible en T;
 # referenciado por init de A13). Contenido orientado a kernel 3.10.
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/cgroups.json:$(TARGET_COPY_OUT_VENDOR)/etc/cgroups.json \
     $(LOCAL_PATH)/configs/task_profiles.json:$(TARGET_COPY_OUT_VENDOR)/etc/task_profiles.json
-
 # FIX-034: override gpuservice.rc (service "gpu") para desactivarlo en
 # kernel 3.10 (sin CONFIG_BPF_SYSCALL -> abort en BpfMap::BpfMap).
 # Lleva "override" (init A13) y va al mismo subcontext /system que el
 # gpuservice.rc generado por Soong desde frameworks/native.
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/init/gpuservice_disabled.rc:$(TARGET_COPY_OUT_SYSTEM)/etc/init/gpuservice_disabled.rc
-
 # FIX-034b: el main de android.hardware.audio.service (LOS20) arranca un
 # threadpool sobre /dev/vndbinder y luego llama a
 # ABinderProcess_setThreadPoolMaxThreadCount. El Exynos 3475 con kernel 3.10
@@ -303,10 +271,8 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/init/audioserver_no_hal.rc:$(TARGET_COPY_OUT_SYSTEM)/etc/init/audioserver_no_hal.rc
     $(LOCAL_PATH)/configs/init/audio_hal_disabled.rc:$(TARGET_COPY_OUT_SYSTEM)/etc/init/audio_hal_disabled.rc
-
 # Particiones: dispositivo no-A/B legacy
 $(call inherit-product, $(SRC_TARGET_DIR)/product/non_ab_device.mk)
-
 # NOTA (eliminado respecto a 17.1):
 #   - props ro.secure=0 / ro.adb.secure=0 / ro.debuggable=1 (inseguras)
 #   - configstore (eliminado en A12; usar disable_configstore si hace falta)
@@ -316,21 +282,17 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/non_ab_device.mk)
 #     la entrada VINTF correspondiente quedó marcada TODO en manifest.xml)
 #   - tv.input
 #   - audio_policy.conf (formato muerto en T)
-
 # call Samsung LSI board support package
 $(call inherit-product, hardware/samsung_slsi/exynos5/exynos5.mk)
 $(call inherit-product, hardware/samsung_slsi/exynos3475/exynos3475.mk)
-
 # call the proprietary setup
 $(call inherit-product, vendor/samsung/universal3475-common/universal3475-common-vendor.mk)
-
 # Placeholder /cpefs para e2fsdroid (target_files/system.img): el dir debe
 # existir en el staging de SYSTEM para que aplique el selabel de config.fs
 # ([cpefs/] 0771 system:radio). En runtime queda tapado por el mount de la
 # partición CPEFS (fstab.universal3475). Archivo vacío: sin contenido EFS real.
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/cpefs.placeholder:system/cpefs/.placeholder
-
 # ---------------------------------------------------------------------------
 # Diagnostico de arranque (opt-in)
 #
@@ -356,3 +318,7 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/init/bootlog.rc:$(TARGET_COPY_OUT_SYSTEM)/etc/init/bootlog.rc \
     $(LOCAL_PATH)/configs/init/hw/zygote_diag.rc:$(TARGET_COPY_OUT_SYSTEM)/etc/init/hw/zygote_diag.rc
 endif
+
+# ADB TCP para diagnóstico post-boot
+PRODUCT_SYSTEM_PROPERTIES += \
+    $(LOCAL_PATH)/system.prop
