@@ -104,3 +104,31 @@ LOCAL_SRC_FILES		:= ../configs/init/zygote_no_netd_restart.rc
 LOCAL_MODULE_PATH	:= $(TARGET_OUT)/etc/init
 include $(BUILD_PREBUILT)
 
+
+# gnss_disabled.rc - deshabilita HAL gnss que crashea
+include $(CLEAR_VARS)
+LOCAL_MODULE		:= gnss_disabled.rc
+LOCAL_MODULE_TAGS	:= optional
+LOCAL_MODULE_CLASS	:= ETC
+LOCAL_SRC_FILES		:= ../configs/init/gnss_disabled.rc
+LOCAL_MODULE_PATH	:= $(TARGET_OUT)/etc/init
+include $(BUILD_PREBUILT)
+
+# memtrack_disabled.rc - deshabilita HAL memtrack que crashea
+include $(CLEAR_VARS)
+LOCAL_MODULE		:= memtrack_disabled.rc
+LOCAL_MODULE_TAGS	:= optional
+LOCAL_MODULE_CLASS	:= ETC
+LOCAL_SRC_FILES		:= ../configs/init/memtrack_disabled.rc
+LOCAL_MODULE_PATH	:= $(TARGET_OUT)/etc/init
+include $(BUILD_PREBUILT)
+
+# sensors_disabled.rc - deshabilita HAL sensors que crashea
+include $(CLEAR_VARS)
+LOCAL_MODULE		:= sensors_disabled.rc
+LOCAL_MODULE_TAGS	:= optional
+LOCAL_MODULE_CLASS	:= ETC
+LOCAL_SRC_FILES		:= ../configs/init/sensors_disabled.rc
+LOCAL_MODULE_PATH	:= $(TARGET_OUT)/etc/init
+include $(BUILD_PREBUILT)
+

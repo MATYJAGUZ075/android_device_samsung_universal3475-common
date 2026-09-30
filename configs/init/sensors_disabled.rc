@@ -1,0 +1,8 @@
+# Deshabilita HAL sensors que crashea en kernel 3.10
+service android.hardware.sensors@1.0-service /vendor/bin/hw/android.hardware.sensors@1.0-service
+    class hal
+    hwbinder
+    user sensors
+    group sensors
+    disabled
+    override

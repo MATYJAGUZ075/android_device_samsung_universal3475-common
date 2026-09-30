@@ -1,0 +1,8 @@
+# Deshabilita HAL memtrack que crashea en kernel 3.10
+service android.hardware.memtrack@1.0-service /vendor/bin/hw/android.hardware.memtrack@1.0-service
+    class hal
+    hwbinder
+    user memtrack
+    group memtrack
+    disabled
+    override
