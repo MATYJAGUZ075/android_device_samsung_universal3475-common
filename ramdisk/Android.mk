@@ -94,3 +94,13 @@ LOCAL_SRC_FILES		:= ../configs/init/netd.rc
 LOCAL_MODULE_PATH	:= $(TARGET_OUT)/etc/init
 include $(BUILD_PREBUILT)
 
+
+# zygote_no_netd_restart.rc - elimina onrestart restart netd/wificond de zygote
+include $(CLEAR_VARS)
+LOCAL_MODULE		:= zygote_no_netd_restart.rc
+LOCAL_MODULE_TAGS	:= optional
+LOCAL_MODULE_CLASS	:= ETC
+LOCAL_SRC_FILES		:= ../configs/init/zygote_no_netd_restart.rc
+LOCAL_MODULE_PATH	:= $(TARGET_OUT)/etc/init
+include $(BUILD_PREBUILT)
+
