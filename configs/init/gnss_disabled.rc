@@ -1,8 +1,0 @@
-# Deshabilita HAL gnss que crashea en kernel 3.10
-service android.hardware.gnss@1.0-service /vendor/bin/hw/android.hardware.gnss@1.0-service
-    class hal
-    hwbinder
-    user gps
-    group gps
-    disabled
-    override
