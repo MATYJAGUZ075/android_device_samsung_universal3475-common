@@ -191,7 +191,18 @@ BOARD_HAVE_SAMSUNG_BLUETOOTH := true
 BACKLIGHT_PATH := "/sys/class/backlight/panel/brightness"
 
 # Recovery
-TARGET_NO_RECOVERY := true
+# FIX-016: NO usar TARGET_NO_RECOVERY=true. Rompe la generation del ZIP.
+#   board_config.mk:505  -> sin recovery, BUILDING_RECOVERY_IMAGE queda vacio
+#   core/Makefile:2149   -> recovery_fstab solo se define si BUILDING_RECOVERY_IMAGE
+#   core/Makefile:5017   -> ifeq ($(recovery_fstab),) => build_ota_package := false
+#   core/Makefile:6237   -> sin build_ota_package no existe INTERNAL_OTA_PACKAGE_TARGET
+#                            ni el goal "otapackage", y vendor/lineage/build/tasks/
+#                            bacon.mk degrada a "ln -f <vacio> <zip>".
+#   Sintomas: run 37124830075 -> "ln: cannot create hard link from
+#   'out/target/product/j2lte/lineage-*.zip' to './lineage-*.zip': No such file
+#   or directory"; run 37142193143 -> "FAILED: ninja: unknown target 'otapackage'".
+#   No hay forma de tener ZIP de ROM sin build_ota_package, y no hay forma de
+#   tener build_ota_package sin recovery_fstab. Son fases distintas.
 TARGET_RECOVERY_FSTAB := $(LOCAL_PATH)/ramdisk/etc/fstab.universal3475
 
 # SELinux
