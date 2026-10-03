@@ -15,6 +15,9 @@
 #
 LOCAL_PATH := device/samsung/universal3475-common
 DEVICE_PACKAGE_OVERLAYS += $(LOCAL_PATH)/overlay
+
+# Android Go / low-RAM defaults (7 optimizaciones) para el J2 de 1 GB.
+$(call inherit-product, $(LOCAL_PATH)/device-common_go.mk)
 # Audio policy XML (formato moderno; el .conf legacy ya no se copia en T).
 # TODO(fase 4): regenerar audio_policy_configuration.xml a version 7.0.
 PRODUCT_COPY_FILES += \

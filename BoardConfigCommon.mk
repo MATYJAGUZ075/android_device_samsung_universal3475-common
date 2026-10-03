@@ -44,6 +44,10 @@ TARGET_CPU_ABI := armeabi-v7a
 TARGET_CPU_ABI2 := armeabi
 TARGET_CPU_VARIANT := cortex-a7
 
+# Memory — 1 GB RAM: jemalloc Svelte (recomendado AOSP para low-RAM).
+# MALLOC_SVELTE es variable de BoardConfig, no de producto.
+MALLOC_SVELTE := true
+
 # Modelo bootimg del J2 (FIX-028): el kernel compila zImage-dtb
 # (CONFIG_BUILD_ARM_APPENDED_DTB_IMAGE=y, defconfig:530) => los DTB van
 # DENTRO del zImage. No hay dt.img separado ni dtbtool (eliminado de
