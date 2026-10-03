@@ -37,8 +37,6 @@ PRODUCT_ART_TARGET_INCLUDE_DEBUG_BUILD := false
 # low-RAM devices (saves RAM and storage).
 PRODUCT_PACKAGES += \
     InProcessNetworkStack \
-    CellBroadcastAppPlatform \
-    CellBroadcastServiceModulePlatform \
     com.android.tethering.inprocess
 
 # (6) Strip the local variable table and the local variable type table to reduce
