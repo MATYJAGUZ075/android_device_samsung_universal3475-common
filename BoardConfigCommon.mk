@@ -191,6 +191,7 @@ BOARD_HAVE_SAMSUNG_BLUETOOTH := true
 BACKLIGHT_PATH := "/sys/class/backlight/panel/brightness"
 
 # Recovery
+TARGET_NO_RECOVERY := true
 TARGET_RECOVERY_FSTAB := $(LOCAL_PATH)/ramdisk/etc/fstab.universal3475
 
 # SELinux
