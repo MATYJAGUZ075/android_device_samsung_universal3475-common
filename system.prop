@@ -1,4 +1,15 @@
 # ADB TCP para diagnóstico post-boot
+# FIX-019: restaurar ro.adb.secure=0 (revert de fecf15d).
+# fecf15d quitó la línea diciendo que el build system ya define
+# ro.adb.secure=1 en PRODUCT_SYSTEM_DEFAULT_PROPERTIES. Reasoning invertido:
+# al NO declarar la propiedad aqui aplica el default 1, que es exactamente lo
+# que hace que Android pida "Permitir depuracion USB" y el equipo aparezca
+# como 'unauthorized'. Con la ROM en userdebug no hace falta autorizacion, y
+# sin esto adb no sirve para diagnosticar nada.
+ro.adb.secure=0
 ro.debuggable=1
 persist.adb.tcp.port=5555
 persist.sys.usb.config=adb
+# Sin autorizacion, adb no crea ~/.android/adbkey ni exige confirmacion, por lo
+# que tambien hay que dejar el pairing en modo "sin paternalidad".
+ro.adb.authenticate=0
