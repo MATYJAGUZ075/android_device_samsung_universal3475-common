@@ -41,8 +41,8 @@ PRODUCT_PACKAGES += \
 # "vendor: true" en su Android.bp se instalaba en /system/lib/hw/ en vez de
 # /vendor/lib/hw/, donde si lo busca el provider vendor.
 PRODUCT_PACKAGES += \
-    android.hardware.camera.provider@2.4-impl-legacy \
-    android.hardware.camera.provider@2.4-service \
+    android.hardware.camera.provider@2.5-legacy \
+    android.hardware.camera.provider@2.5-service \
     camera.universal3475
 # DRM
 PRODUCT_PACKAGES += \
