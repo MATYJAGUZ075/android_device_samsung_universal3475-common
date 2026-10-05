@@ -100,6 +100,20 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     android.hardware.memtrack@1.0-impl \
     android.hardware.memtrack@1.0-service
+# Sensors y vibrador.
+#
+# sensors.universal3475.so es el HAL de sensores real (blob vendor, ahora
+# instalado en vendor/lib/hw); esto es solo el envoltorio HIDL que AOSP
+# provee. Sin el, el VINTF declara android.hardware.sensors pero no hay
+# servicio que lo atienda.
+#
+# Lo mismo para el vibrador: android.hardware.vibrator@1.0-impl carga
+# vibrator.default.so desde vendor/lib/hw.
+PRODUCT_PACKAGES += \
+    android.hardware.sensors@1.0-impl \
+    android.hardware.sensors@1.0-service \
+    android.hardware.vibrator@1.0-impl \
+    android.hardware.vibrator@1.0-service
 # Mobicore (TEE)
 PRODUCT_PACKAGES += \
     mcDriverDaemon \
