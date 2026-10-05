@@ -168,8 +168,35 @@ bool VendorInterface::Initialize(
     return false;
   }
   g_vendor_interface = new VendorInterface();
-  return g_vendor_interface->Open(initialize_complete_cb, event_cb, acl_cb,
-                                  sco_cb, iso_cb);
+  if (!g_vendor_interface->Open(initialize_complete_cb, event_cb, acl_cb, sco_cb,
+                                iso_cb)) {
+    /*
+     * Open() has five failure paths (dlopen, dlsym, init() != 0, an invalid
+     * fd_count, an INVALID_FD) and none of them restore any state. Since the
+     * instance was already assigned to g_vendor_interface above, a failed Open
+     * left the global set forever: only Shutdown() clears it.
+     *
+     * That turned a single failure into an unrecoverable loop. Bluetooth's
+     * HIDL implementation returns INITIALIZATION_ERROR, and on Android 13 the
+     * stack aborts on it:
+     *
+     *   bludroid/bt_stack_manage: assertion 'status == HidlStatus::SUCCESS' failed
+     *   signal 6 (SIGABRT)
+     *
+     * The process dies, Bluetooth is restarted, Initialize() finds
+     * g_vendor_interface still set, logs "No previous Shutdown()?" and returns
+     * false again, and the stack aborts again. Measured on the device: seven
+     * aborts in thirteen seconds, all in bt_stack_manage.
+     *
+     * Release the instance on failure so the next attempt starts clean. The
+     * Open() failure itself still surfaces as INITIALIZATION_ERROR; this only
+     * makes it recoverable instead of permanent.
+     */
+    delete g_vendor_interface;
+    g_vendor_interface = nullptr;
+    return false;
+  }
+  return true;
 }
 
 void VendorInterface::Shutdown() {
