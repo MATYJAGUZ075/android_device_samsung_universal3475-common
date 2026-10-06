@@ -208,7 +208,20 @@ PRODUCT_PACKAGES += \
 # con las mismas acquire/release_wake_lock que gpsd consume (auditoría UND
 # FIX-008). El PRODUCT_PACKAGES de abajo instala ahora el módulo upstream.
 # FIX-020: libhidltransport eliminada del BT HAL (fusionada en libhidlbase en R).
+# Dependencias del blob de camara.
+#
+# camera.vendor.exynos5.so declara NEEDED sobre libcsc, libexynosutils y
+# libexynosv4l2. El dlopen aborta antes de llegar al codigo del HAL si falta
+# cualquiera de las tres. Los modulos ya existen en el arbol, en
+# hardware/samsung_slsi/exynos (libv4l2/ se declara como libexynosv4l2), solo
+# faltaban en PRODUCT_PACKAGES.
 PRODUCT_PACKAGES += \
+    libcsc \
+    libexynosutils \
+    libexynosv4l2
+
+PRODUCT_PACKAGES += \
+    libexynoscamera_shim \
     libstagefright_shim \
     libcamera_client_shim \
     libgpsd_shim \

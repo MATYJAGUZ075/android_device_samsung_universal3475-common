@@ -225,6 +225,19 @@ PRODUCT_SOONG_NAMESPACES += $(LOCAL_PATH)
 TARGET_LD_SHIM_LIBS += \
     /system/bin/mediaserver|/system/lib/libstagefright_shim.so
 
+# Cadena de la camara. Sin estas entradas el linker no le inyecta el shim a las
+# librerias que cargan el blob, y el dlopen aborta con "cannot locate symbol".
+# Medido en el telefono: los shims se instalan en /vendor/lib pero ningun linker
+# los carga, asi que sus simbolos nunca entran al ambito del proceso:
+#   E vndksupport: Could not load /vendor/lib/hw/camera.vendor.exynos5.so
+#     from default namespace: dlopen failed: cannot locate symbol
+#     "_ZN7android16CameraParameters7KEY_ISOE"
+TARGET_LD_SHIM_LIBS += \
+    /system/lib/libcamera_client.so|/vendor/lib/libcamera_client_shim.so \
+    /vendor/lib/libexynoscameraexternal.so|/vendor/lib/libexynoscamera_shim.so \
+    /vendor/lib/libexynoscameraexternal.so|/vendor/lib/libcamera_client_shim.so \
+    /vendor/lib/hw/camera.vendor.exynos5.so|/vendor/lib/libexynoscamera_shim.so
+
 # /vendor/bin/gpsd es un blob pre-Android-12 que llama a la firma antigua de
 # SensorManager::createEventQueue(String8, int). A partir de A12 esa funcion
 # lleva un tercer argumento (attributionTag), con lo que el simbolo
