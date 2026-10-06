@@ -200,8 +200,14 @@ bool VendorInterface::Initialize(
 }
 
 void VendorInterface::Shutdown() {
-  LOG_ALWAYS_FATAL_IF(!g_vendor_interface, "%s: No Vendor interface!",
-                      __func__);
+  // Nothing to close when the interface never came up. Shutdown is reached from
+  // the stack teardown path after an Open failure, and it has to be safe to call
+  // then, otherwise it aborts the process and turns a recoverable condition back
+  // into a crash.
+  if (!g_vendor_interface) {
+    ALOGI("%s: no vendor interface, nothing to do", __func__);
+    return;
+  }
   g_vendor_interface->Close();
   delete g_vendor_interface;
   g_vendor_interface = nullptr;
