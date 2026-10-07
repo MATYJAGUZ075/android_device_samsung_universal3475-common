@@ -28,13 +28,20 @@ PRODUCT_COPY_FILES += \
     frameworks/av/services/audiopolicy/config/usb_audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/usb_audio_policy_configuration.xml \
     $(LOCAL_PATH)/configs/audio/audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/audio_policy_configuration.xml
 # Bluetooth — HAL HIDL 1.0 custom del common (enfoque Exynos7420).
-# P-1 (22/08): libbt-vendor retirado del PRODUCT_PACKAGES — sin definición de
-# módulo ni blob verificable en el árbol/vendor. El impl.3475 lo carga por
-# dlopen en runtime (VENDOR_LIBRARY_NAME), no lo enlaza en build, así que el
-# build no se afecta; BT quedará inoperativo hasta la fase Bluetooth/vendor,
-# donde se localizará el .so y se agregará a proprietary-files.txt.
+# libbt-vendor no se declara en PRODUCT_PACKAGES: no es un modulo de AOSP que
+# nos sirva aqui, sino la libreria de transporte HCI real, que se instala
+# como blob vendor. El impl.3475 la abre por soname en runtime
+# (vendor_interface.cc), asi que tiene que existir en el namespace vendor o el
+# dlopen aborta y el stack de BT muere en initializationComplete.
 PRODUCT_PACKAGES += \
     android.hardware.bluetooth@1.0-impl.3475
+
+# libbt_vndcfg.txt lo lee la libreria de transporte en runtime para el puerto
+# UART, la ruta del firmware y el retardo de asentamiento. BOARD_CUSTOM_BT_CONFIG
+# (BoardConfigCommon.mk) solo lo marca para el build; hay que instalarlo.
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/bluetooth/libbt_vndcfg.txt:$(TARGET_COPY_OUT_VENDOR)/etc/bluetooth/libbt_vndcfg.txt
+
 # Camera
 # camera.universal3475 es el wrapper local (camera/) que adapta el blob de
 # camara de Samsung a Camera2. Sin declararlo aqui nunca se construia, y sin
