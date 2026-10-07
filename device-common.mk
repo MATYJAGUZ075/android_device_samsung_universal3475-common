@@ -39,8 +39,12 @@ PRODUCT_PACKAGES += \
 # libbt_vndcfg.txt lo lee la libreria de transporte en runtime para el puerto
 # UART, la ruta del firmware y el retardo de asentamiento. BOARD_CUSTOM_BT_CONFIG
 # (BoardConfigCommon.mk) solo lo marca para el build; hay que instalarlo.
+# bt_vendor.conf le dice que firmware concreto cargar. Sin el, el controlador se
+# detecta pero nunca se parchea: en el telefono salia
+# "bt_hwcfg: FW patchfile:" vacio. Con el sale la ruta real.
 PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/bluetooth/libbt_vndcfg.txt:$(TARGET_COPY_OUT_VENDOR)/etc/bluetooth/libbt_vndcfg.txt
+    $(LOCAL_PATH)/bluetooth/libbt_vndcfg.txt:$(TARGET_COPY_OUT_VENDOR)/etc/bluetooth/libbt_vndcfg.txt \
+    $(LOCAL_PATH)/configs/bluetooth/bt_vendor.conf:$(TARGET_COPY_OUT_VENDOR)/etc/bluetooth/bt_vendor.conf
 
 # Camera
 # camera.universal3475 es el wrapper local (camera/) que adapta el blob de
