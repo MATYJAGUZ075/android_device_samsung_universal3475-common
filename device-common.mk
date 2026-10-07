@@ -51,18 +51,8 @@ PRODUCT_COPY_FILES += \
 # camara de Samsung a Camera2. Sin declararlo aqui nunca se construia, y sin
 # "vendor: true" en su Android.bp se instalaba en /system/lib/hw/ en vez de
 # /vendor/lib/hw/, donde si lo busca el provider vendor.
-#
-# El passthrough legacy (provider@2.5-legacy -> provider@2.4-legacy) ya NO se
-# declara. Su CameraModule::notifyDeviceStateChange desreferencia un mModule que
-# queda null porque el HAL de debajo no inicializa, y eso tumba el servicio con
-# SIGSEGV. cameraserver recibe DEAD_OBJECT, el assertOk de HIDL falla y tambien
-# muere con SIGABRT: los dos en bucle, ~1 vez por segundo, arrastrando a
-# cameraserver por todo el log.
-#
-# Medido en el telefono deteniendo ese servicio: 26 crashes en 25 s -> 0,
-# cameraserver queda vivo y estable, y frees ~30 MB de RAM. El servicio de
-# camara sigue sin detectar sensores, pero al menos no tumba el sistema.
 PRODUCT_PACKAGES += \
+    android.hardware.camera.provider@2.5-legacy \
     android.hardware.camera.provider@2.5-service \
     camera.universal3475
 # DRM
