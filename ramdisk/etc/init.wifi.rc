@@ -13,6 +13,12 @@ on post-fs-data
     mkdir /data/vendor/wifi/wpa/sockets 0770 wifi wifi
 
     # for WIFI TRP/TIS
+    # PSM (Proximity/power save): si el "apagado de WiFi" viene de un
+    # .info!=0 (mode_stand_alone heredado del factory), el driver entra en
+    # powersave agresivo y descarta el beacon -> DEAUTH_LEAVING en bucle.
+    # Escribir 0 fuerza mode_off. Tambien testeable en runtime:
+    #   echo 0 > /data/.psm.info   (con root, sin rebuild)
+    write /data/.psm.info 0
     chown system root /data/.psm.info
     chmod 0664 /data/.psm.info
 

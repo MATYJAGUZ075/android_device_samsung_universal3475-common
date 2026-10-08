@@ -166,8 +166,10 @@ BOARD_HOSTAPD_PRIVATE_LIB := lib_driver_cmd_bcmdhd
 BOARD_WPA_SUPPLICANT_DRIVER := NL80211
 BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_bcmdhd
 WPA_SUPPLICANT_VERSION := VER_0_8_X
-# FIX-017: WPA_SUPPLICANT_USE_HIDL retirado — variable muerta en LOS20
-# (external_wpa_supplicant_8 lineage-20.0 solo implementa la ruta AIDL).
+# Interfaz de control HIDL de wpa_supplicant: la usa el HAL wifi@1.0 legacy
+# (android.hardware.wifi@1.0-service, ver device-common.mk). Sin esto el
+# supplicant no expone su ctrl path por HIDL y el HAL legacy no conecta.
+WPA_SUPPLICANT_USE_HIDL := true
 WIFI_BAND := 802_11_ABG
 WIFI_DRIVER_MODULE_ARG      := "firmware_path=/vendor/etc/wifi/bcmdhd_sta.bin nvram_path=/vendor/etc/wifi/nvram_net.txt"
 WIFI_DRIVER_MODULE_AP_ARG   := "firmware_path=/vendor/etc/wifi/bcmdhd_apsta.bin nvram_path=/vendor/etc/wifi/nvram_net.txt"
