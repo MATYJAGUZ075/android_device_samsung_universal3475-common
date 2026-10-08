@@ -1,0 +1,22 @@
+# Sensor HAL: acceso a sysfs de entrada para descubrir/leer los nodos de
+# evento del acelerometro y el sensor de proximidad.
+allow hal_sensors_default sysfs_input:dir r_dir_perms;
+allow hal_sensors_default sysfs_input:file rw_file_perms;
+allow hal_sensors_default sysfs_input:lnk_file r_file_perms;
+
+# Sensor HAL: acceso al sysfs de sensores.
+allow hal_sensors_default sysfs_sensors:dir r_dir_perms;
+allow hal_sensors_default sysfs_sensors:file rw_file_perms;
+allow hal_sensors_default sysfs_sensors:lnk_file r_file_perms;
+
+# Nodos de dispositivo de entrada para acelerometro y proximidad.
+allow hal_sensors_default input_device:dir r_dir_perms;
+allow hal_sensors_default input_device:chr_file rw_file_perms;
+
+# Nodos de sensor (/dev/batch_io, /dev/ssp_sensorhub).
+allow hal_sensors_default sensor_device:chr_file rw_file_perms;
+
+# Datos de calibracion de sensores en EFS.
+allow hal_sensors_default sensor_efs_file:file r_file_perms;
+allow hal_sensors_default sensor_factoryapp_efs_file:file r_file_perms;
+allow hal_sensors_default efs_file:dir r_dir_perms;
