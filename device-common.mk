@@ -252,21 +252,25 @@ PRODUCT_COPY_FILES += \
 PRODUCT_PACKAGES += \
     android.hardware.usb@1.0-service.basic
 # Wi-Fi — bcmdhd (driver NL80211 en kernel) + supplicant/hostapd.
-# FIX-017: android.hardware.wifi@1.0-{service,impl} NO existen en
-# hardware/interfaces lineage-20.0 (solo definiciones .hal) -> eliminados
-# ("missing module" garantizado). Los servicios reales de LOS20 son AIDL y los
-# provee external/wpa_supplicant_8 (CONFIG_CTRL_IFACE_AIDL=y por defecto en
-# android.config), que instala sus propios VINTF fragments
-# (android.hardware.wifi.{hostapd,supplicant}.xml, fqname default).
-# LIMITACION CONOCIDA: sin HAL de chip (IWifiChip) el WiFi puede quedar no
-# funcional hasta una fase futura; igual que BT, no bloquea el build.
+# FIX-017: los modulos del HAL wifi@1.0 no viven en hardware/interfaces LOS20
+# sino en hardware/lineage/interfaces (wifi/1.0-legacy). En nuestro fork se
+# restauran aplicando patches/hardware-lineage-interfaces/*.patch (fase P1).
+# ESTRATEGIA (bug 2, DEAUTH_LEAVING ~20s): psm.info=0 + hot-swap de firmware
+# por sysfs (ya en el kernel) atacan el powersave; el HAL legacy wifi@1.0 +
+# supplicant HIDL es la solucion de fondo (la ruta AIDL sin IWifiChip deja el
+# estado del chip inconsistente). Bloquear estos productos solo si un build de
+# prueba falla por modulo missing: la fase P1 los necesita.
 PRODUCT_PACKAGES += \
     macloader \
     wifiloader \
     hostapd \
     wificond \
     wpa_supplicant \
-    wpa_supplicant.conf
+    wpa_supplicant.conf \
+    android.hardware.wifi@1.0 \
+    android.hardware.wifi@1.0-service \
+    libwpa_client \
+    TetheringOverlay
 # Wi-Fi Configs
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/wifi/p2p_supplicant_overlay.conf:system/vendor/etc/wifi/p2p_supplicant_overlay.conf \
@@ -347,3 +351,11 @@ endif
 # ADB TCP para diagnóstico post-boot
 PRODUCT_SYSTEM_PROPERTIES += \
     $(LOCAL_PATH)/system.prop
+
+# ADB sobre FunctionFS: forzar el camino sin AIO en userspace (el kernel 3.10
+# no soporta fully async ffs) para que el USB no falle al volcar buffers.
+# persist.* se puede forzar tambien en runtime (setprop + reboot) para testear
+# antes de rebuildar; ro.* solo via build.
+PRODUCT_SYSTEM_PROPERTIES += \
+    persist.adb.nonblocking_ffs=0 \
+    ro.adb.nonblocking_ffs=0
