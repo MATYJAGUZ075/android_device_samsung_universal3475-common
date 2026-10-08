@@ -22,12 +22,119 @@
 
 #include <unistd.h>
 #include <stdatomic.h>
+#include <string.h>
+#include <cutils/native_handle.h>
 
 #include "CameraWrapper.h"
 #include "Camera2Wrapper.h"
 #include "CallbackWorkerThread.h"
 
+#include <map>
+#include <mutex>
+
 CallbackWorkerThread cbThread;
+
+static camera_request_memory gOriginalGetMemory = nullptr;
+static camera_data_timestamp_callback gOriginalDataCbTimestamp = nullptr;
+static void* gCameraDeviceUser = nullptr;
+
+atomic_int BlockCbs = 0;
+
+struct MetadataMapping {
+    camera_memory_t* fw_mem;
+    void* vendor_opaque;
+};
+static std::mutex gMetadataMapLock;
+static std::map<void*, MetadataMapping> gMetadataMap;
+
+static void local_memory_release(struct camera_memory *mem) {
+    if (mem) {
+        if (mem->data) {
+            free(mem->data);
+        }
+        free(mem);
+    }
+}
+
+static camera_memory_t* WrappedGetMemory(int fd, size_t buf_size, unsigned int num_bufs, void *user) {
+    // The vendor HAL passes its camera device as the memory callback cookie
+    // during picture capture. Always restore the framework cookie saved by
+    // set_callbacks so CameraDevice::sGetMemory receives a valid object.
+    void *actual_user = gCameraDeviceUser ? gCameraDeviceUser : user;
+    if (user != actual_user) {
+        ALOGV("%s: replacing vendor cookie %p with framework cookie %p",
+                __FUNCTION__, user, actual_user);
+    }
+    
+    // Intercept 20-byte video metadata buffers to decouple from framework
+    if (buf_size == 20) {
+        camera_memory_t* mem = (camera_memory_t*)malloc(sizeof(camera_memory_t));
+        if (mem) {
+            mem->data = malloc(buf_size * num_bufs);
+            mem->size = buf_size;
+            mem->handle = mem;
+            mem->release = local_memory_release;
+            return mem;
+        }
+    }
+    
+    if (gOriginalGetMemory) {
+        return gOriginalGetMemory(fd, buf_size, num_bufs, actual_user);
+    }
+    return nullptr;
+}
+
+static void WrappedDataCbTimestamp(int64_t timestamp, int32_t msg_type, const camera_memory_t *data, unsigned int index, void *user) {
+    if (BlockCbs == 1) {
+        ALOGV("%s->BlockCbs == 1", __FUNCTION__);
+        return;
+    }
+    
+    void *actual_user = gCameraDeviceUser ? gCameraDeviceUser : user;
+    
+    if (data && data->size == 20 && data->data) {
+        uint8_t *buffer = (uint8_t*)data->data + index * 20;
+        uint32_t *array = (uint32_t*)buffer;
+
+        int fd1 = array[1];
+        int fd2 = array[2];
+
+        // Allocate a strict 8-byte buffer from the framework
+        if (gOriginalGetMemory) {
+            camera_memory_t* fw_mem = gOriginalGetMemory(-1, 8, 1, actual_user);
+            if (fw_mem && fw_mem->data) {
+                native_handle_t* handle = native_handle_create(2, 1);
+                if (handle) {
+                    handle->data[0] = dup(fd1);
+                    handle->data[1] = dup(fd2);
+                    handle->data[2] = index; // backup index to use in release_recording_frame
+
+                    uint32_t* fw_array = (uint32_t*)fw_mem->data;
+                    fw_array[0] = 3; // kMetadataBufferTypeNativeHandleSource
+                    *(native_handle_t**)(&fw_array[1]) = handle;
+                    
+                    // Map framework opaque to vendor opaque
+                    {
+                        std::lock_guard<std::mutex> lock(gMetadataMapLock);
+                        gMetadataMap[fw_mem->data] = {fw_mem, buffer};
+                    }
+                    
+                    // Pass the 8-byte standard buffer to the framework
+                    if (gOriginalDataCbTimestamp) {
+                        gOriginalDataCbTimestamp(timestamp, msg_type, fw_mem, 0, actual_user);
+                    }
+                    return; // Skip standard pass-through
+                } else {
+                    fw_mem->release(fw_mem);
+                }
+            }
+        }
+    }
+    
+    if (gOriginalDataCbTimestamp) {
+        gOriginalDataCbTimestamp(timestamp, msg_type, data, index, actual_user);
+    }
+}
 
 #include <sys/time.h>
 
@@ -75,50 +182,6 @@ static int check_vendor_module()
 }
 
 /*******************************************************************
- * Camera2 wrapper fixup functions
- *******************************************************************/
-
-static char * camera2_fixup_getparams(int id __unused, const char * settings) {
-    android::CameraParameters params;
-    params.unflatten(android::String8(settings));
-
-#ifdef LOG_PARAMETERS
-    ALOGV("%s: Original parameters:", __FUNCTION__);
-    params.dump();
-#endif
-
-#ifdef LOG_PARAMETERS
-    ALOGV("%s: Fixed parameters:", __FUNCTION__);
-    params.dump();
-#endif
-
-    android::String8 strParams = params.flatten();
-    char *ret = strdup(strParams.string());
-
-    return ret;
-}
-
-static char * camera2_fixup_setparams(int id __unused, const char * settings) {
-    android::CameraParameters params;
-    params.unflatten(android::String8(settings));
-
-#ifdef LOG_PARAMETERS
-    ALOGV("%s: Original parameters:", __FUNCTION__);
-    params.dump();
-#endif
-
-#ifdef LOG_PARAMETERS
-    ALOGV("%s: Fixed parameters:", __FUNCTION__);
-    params.dump();
-#endif
-
-    android::String8 strParams = params.flatten();
-    char *ret = strdup(strParams.string());
-
-    return ret;
-}
-
-/*******************************************************************
  * implementation of camera_device_ops functions
  *******************************************************************/
 
@@ -146,8 +209,6 @@ static int camera2_set_preview_window(struct camera_device * device,
     return rc;
 }
 
-atomic_int BlockCbs;
-
 void WrappedNotifyCb (int32_t msg_type, int32_t ext1, int32_t ext2, void *user) {
     ALOGV("%s->In", __FUNCTION__);
 
@@ -165,7 +226,7 @@ void WrappedNotifyCb (int32_t msg_type, int32_t ext1, int32_t ext2, void *user) 
     newWorkerMessage->msg_type = msg_type;
     newWorkerMessage->ext1 = ext1;
     newWorkerMessage->ext2 = ext2;
-    newWorkerMessage->user = user;
+    newWorkerMessage->user = gCameraDeviceUser ? gCameraDeviceUser : user;
 
     /* Post the message to the callback worker */
     cbThread.AddCallback(newWorkerMessage);
@@ -194,7 +255,7 @@ void WrappedDataCb (int32_t msg_type, const camera_memory_t *data, unsigned int 
     newWorkerMessage->data = data;
     newWorkerMessage->index= index;
     newWorkerMessage->metadata = metadata;
-    newWorkerMessage->user = user;
+    newWorkerMessage->user = gCameraDeviceUser ? gCameraDeviceUser : user;
 
     /* Post the message to the callback worker */
     cbThread.AddCallback(newWorkerMessage);
@@ -216,6 +277,10 @@ static void camera2_set_callbacks(struct camera_device * device,
     if(!device)
         return;
 
+    gOriginalGetMemory = get_memory;
+    gOriginalDataCbTimestamp = data_cb_timestamp;
+    gCameraDeviceUser = user;
+
     /* Create and populate a new callback data structure */
     CallbackData* newCallbackData = new CallbackData();
     newCallbackData->NewUserNotifyCb = notify_cb;
@@ -225,7 +290,7 @@ static void camera2_set_callbacks(struct camera_device * device,
     cbThread.SetCallbacks(newCallbackData);
 
     /* Call the set_callbacks function substituting the notify callback with our wrapper */
-    VENDOR_CALL(device, set_callbacks, WrappedNotifyCb, WrappedDataCb, data_cb_timestamp, get_memory, user);
+    VENDOR_CALL(device, set_callbacks, WrappedNotifyCb, WrappedDataCb, WrappedDataCbTimestamp, WrappedGetMemory, user);
 }
 
 static void camera2_enable_msg_type(struct camera_device * device, int32_t msg_type)
@@ -312,7 +377,7 @@ static int camera2_preview_enabled(struct camera_device * device)
 
 static int camera2_store_meta_data_in_buffers(struct camera_device * device, int enable)
 {
-    ALOGV("%s->%08X->%08X", __FUNCTION__, (uintptr_t)device, (uintptr_t)(((wrapper_camera2_device_t*)device)->vendor));
+    ALOGV("%s->%08X->%08X, enable = %d", __FUNCTION__, (uintptr_t)device, (uintptr_t)(((wrapper_camera2_device_t*)device)->vendor), enable);
 
     if(!device)
         return -EINVAL;
@@ -337,8 +402,16 @@ static void camera2_stop_recording(struct camera_device * device)
     if(!device)
         return;
 
+    /* Block queueing more callbacks */
+    BlockCbs = 1;
+
+    /* Clear the callback queue */
+    cbThread.ClearCallbacks();
 
     VENDOR_CALL(device, stop_recording);
+
+    /* Unblock queueing more callbacks */
+    BlockCbs = 0;
 }
 
 static int camera2_recording_enabled(struct camera_device * device)
@@ -359,7 +432,32 @@ static void camera2_release_recording_frame(struct camera_device * device,
     if(!device)
         return;
 
-    VENDOR_CALL(device, release_recording_frame, opaque);
+    void* vendor_opaque = (void*)opaque;
+
+    if (opaque) {
+        std::lock_guard<std::mutex> lock(gMetadataMapLock);
+        auto it = gMetadataMap.find((void*)opaque);
+        if (it != gMetadataMap.end()) {
+            camera_memory_t* fw_mem = it->second.fw_mem;
+            vendor_opaque = it->second.vendor_opaque;
+            
+            uint32_t *fw_array = (uint32_t*)fw_mem->data;
+            if (fw_array[0] == 3) { // kMetadataBufferTypeNativeHandleSource
+                native_handle_t* clone = *(native_handle_t**)(&fw_array[1]);
+                if (clone) {
+                    native_handle_close(clone);
+                    native_handle_delete(clone);
+                }
+            }
+            
+            // Release the framework-allocated memory
+            fw_mem->release(fw_mem);
+            
+            gMetadataMap.erase(it);
+        }
+    }
+
+    VENDOR_CALL(device, release_recording_frame, vendor_opaque);
 }
 
 long long CancelAFTimeGuard = 0;
@@ -403,6 +501,7 @@ static int camera2_cancel_auto_focus(struct camera_device * device)
     /* Post a log message and return success (skipping the call) if the diff is greater than 0 */
     if(TimeDiff > 0) {
         ALOGV("%s: CancelAFTimeGuard for %lli mS\n", __FUNCTION__, TimeDiff * 1000);
+        BlockCbs = 0;
         return 0;
     }
 
@@ -432,7 +531,11 @@ static int camera2_cancel_picture(struct camera_device * device)
     if(!device)
         return -EINVAL;
 
-    return VENDOR_CALL(device, cancel_picture);
+    // The vendor HAL's cancelPicture crashes (SIGSEGV) when no picture is
+    // in progress. The camera.device@1.0-impl-legacy calls this during
+    // disconnect, causing the camera provider to crash. Return success
+    // as a safe no-op.
+    return 0;
 }
 
 static int camera2_set_parameters(struct camera_device * device, const char *params)
@@ -442,12 +545,7 @@ static int camera2_set_parameters(struct camera_device * device, const char *par
     if(!device)
         return -EINVAL;
 
-    char *tmp = NULL;
-    tmp = camera2_fixup_setparams(CAMERA_ID(device), params);
-
-    int ret = VENDOR_CALL(device, set_parameters, tmp);
-
-    return ret;
+    return VENDOR_CALL(device, set_parameters, params);
 }
 
 static char* camera2_get_parameters(struct camera_device * device)
@@ -457,13 +555,7 @@ static char* camera2_get_parameters(struct camera_device * device)
     if(!device)
         return NULL;
 
-    char* params = VENDOR_CALL(device, get_parameters);
-
-    char * tmp = camera2_fixup_getparams(CAMERA_ID(device), params);
-    VENDOR_CALL(device, put_parameters, params);
-    params = tmp;
-
-    return params;
+    return VENDOR_CALL(device, get_parameters);
 }
 
 static void camera2_put_parameters(struct camera_device *device, char *params)
@@ -521,7 +613,24 @@ static int camera2_device_close(hw_device_t* device)
 
     wrapper_dev = (wrapper_camera2_device_t*) device;
 
+    // Cancel auto focus before closing to prevent race condition with
+    // the vendor HAL's autoFocusThread trying to lock a destroyed mutex
+    VENDOR_CALL(device, cancel_auto_focus);
+
+    // The HIDL camera1 adapter closes the device without calling release().
+    // Samsung's close function only deletes the object, while release()
+    // joins its worker threads and closes the V4L2 device cleanly.
+    VENDOR_CALL(device, release);
+
     wrapper_dev->vendor->common.close((hw_device_t*)wrapper_dev->vendor);
+
+    // Give vendor HAL threads time to exit before freeing resources
+    usleep(100000); // 100ms
+
+    gCameraDeviceUser = nullptr;
+    gOriginalGetMemory = nullptr;
+    gOriginalDataCbTimestamp = nullptr;
+
     if (wrapper_dev->base.ops)
         free(wrapper_dev->base.ops);
     free(wrapper_dev);
