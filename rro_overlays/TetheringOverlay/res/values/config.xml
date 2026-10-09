@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2022 The LineageOS Project
+     SPDX-License-Identifier: Apache-2.0
+-->
+<resources>
+    <!-- No usar BPF offload para tethering: el kernel 3.10 de la plataforma no
+         dispone del stack eBPF sobre el que se apoya. -->
+    <bool translatable="false" name="config_tether_enable_bpf_offload">false</bool>
+
+    <string-array translatable="false" name="config_tether_usb_regexs">
+        <item>"usb\\d"</item>
+        <item>"rndis\\d"</item>
+        <item>"ncm\\d"</item>
+    </string-array>
+
+    <string-array translatable="false" name="config_tether_wifi_regexs">
+        <item>"wlan\\d"</item>
+    </string-array>
+
+    <string-array translatable="false" name="config_tether_wifi_p2p_regexs">
+        <item>"p2p-wlan\\d-.*"</item>
+    </string-array>
+</resources>
