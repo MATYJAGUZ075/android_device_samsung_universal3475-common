@@ -9,7 +9,26 @@
 # specify MF_CHECK, and must come before any filesystems that do specify MF_CHECK
 
 #<src>                                                  <mnt_point> <type>  <mnt_flags and options>                                                         <fs_mgr_flags>
-/dev/block/platform/13540000.dwmmc0/by-name/SYSTEM      /system     ext4    ro,noatime,errors=panic,noload,block_validity                                   wait,recoveryonly
+# SYSTEM se monta ro, pero sin noload ni block_validity.
+#
+# noload = montar sin reproducir el journal. Si quedo metadata pendiente de una
+# sesion anterior (por ejemplo una entrada de directorio apuntando a un inodo
+# marcado como borrado), el fs se ve inconsistente desde el arranque.
+# errors=panic convertia ese error en un fallo de arranque, dejando el telefono
+# en bootloop en vez de arrancar con un aviso.
+# block_validity es un parche propietario que valida un checksum por bloque; con
+# el kernel 3.10 de este device devolvia lecturas corruptas de inodos concretos.
+#
+# Medido en el telefono con este arbol (run 37876287662): con las opciones
+# anteriores el arranque caia en un crash-loop de system_server con
+# "UnsatisfiedLinkError: dlopen failed: library \"libcutils.so\" not found:
+# needed by /apex/com.android.adbd/lib/libadb_pairing_server.so in namespace
+# com_android_adbd", acompañado de
+# "EXT4-fs error (device mmcblk0p20): ext4_lookup:1528: inode #72: deleted inode
+# referenced: 81 at parent inode: 72" (72 = dir lib/ del apex adbd,
+# 81 = symlink libcutils.so). El inodo danado cambiaba entre arranques, lo que
+# descarta un sector fisico malo.
+/dev/block/platform/13540000.dwmmc0/by-name/SYSTEM      /system     ext4    ro,noatime,errors=remount-ro,data=ordered                          wait,recoveryonly
 /dev/block/platform/13540000.dwmmc0/by-name/BOOT        /boot       emmc    defaults                                                                        defaults
 /dev/block/platform/13540000.dwmmc0/by-name/OTA         /misc       emmc    defaults                                                                        defaults
 /dev/block/platform/13540000.dwmmc0/by-name/RECOVERY    /recovery   emmc    defaults                                                                        defaults
