@@ -348,6 +348,23 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/init/hw/zygote_diag.rc:$(TARGET_COPY_OUT_SYSTEM)/etc/init/hw/zygote_diag.rc
 endif
 
+# ADB: depuracion habilitada por defecto en early-init.
+#
+# ro.adb.secure no se declara en system.prop a proposito: duplicar esa
+# propiedad rompe el build con "found duplicate sysprop assignments"
+# (run 37205240987), porque PRODUCT_SYSTEM_DEFAULT_PROPERTIES ya define
+# ro.adb.secure=1 y esa fuente no esta en los device trees del manifest.
+# Aplicarlo con setprop desde init evita el duplicado y cubre lo que hace
+# falta en este port:
+#   - persist.adb.notify 0 : no exigir el dialogo de "Permitir depuracion USB"
+#   - service.adb.root 1   : adb root disponible desde el arranque
+#
+# ro.debuggable y ro.secure se declaran aqui por completitud; el init de A13
+# puede rechazar un setprop sobre propiedades ro.* en runtime (quedan con el
+# valor de la build), asi que no son los que resuelven el modo depuracion.
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/configs/init/dbg_adb_root.rc:$(TARGET_COPY_OUT_SYSTEM)/etc/init/dbg_adb_root.rc
+
 # ADB TCP para diagnóstico post-boot
 PRODUCT_SYSTEM_PROPERTIES += \
     $(LOCAL_PATH)/system.prop
