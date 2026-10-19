@@ -11,3 +11,16 @@ allow hal_light_default sysfs_input:file rw_file_perms;
 allow hal_light_default sysfs_sec:dir search;
 allow hal_light_default sysfs_sec:lnk_file read;
 allow hal_light_default sysfs_sec:file rw_file_perms;
+
+# HAL de luces propio en device/samsung/j2lte/light.
+# El servicio (android.hardware.light@2.0-service.samsung) y su libreria
+# (android.hardware.light@2.0-impl.samsung.so) viven en /vendor, asi que el
+# dominio necesita poder leerlos y mapear la libreria para cargarla.
+allow hal_light_default vendor_file:dir search;
+allow hal_light_default vendor_file:file { getattr open read map ioctl };
+allow hal_light_default vendor_file:lnk_file read;
+
+# El brillo se escribe en el sysfs del panel, que el file_contexts del vendor
+# etiqueta como sysfs_light (misma etiqueta que usan los drivers de la
+# plataforma de Samsung).
+allow hal_light_default sysfs_light:file { write append };
