@@ -112,8 +112,26 @@ static int camera_get_camera_info(int camera_id, struct camera_info *info)
     if (check_vendor_module())
         return 0;
     int ret = gVendorModule->get_camera_info(camera_id, info);
-    // Force HAL version to 1.0 - the old vendor HAL reports garbage version
-    info->device_version = CAMERA_DEVICE_API_VERSION_1_0;
+    // Anunciar el dispositivo como HAL v3.4, NO como v1.0.
+    //
+    // El CameraProviderManager del framework (A13) solo acepta major version 3
+    // para dispositivos HIDL; con la v1 los rechaza:
+    //   E CameraProviderManager: addDevice: Device device@1.0/legacy/0:
+    //       Unsupported HIDL device HAL major version 1:
+    //   E CameraProviderManager: initializeProviderInfoCommon: Unable to
+    //       enumerate camera device 'device@1.0/legacy/0': Invalid argument (-22)
+    //   I CameraProviderManager: Camera provider legacy/0 ready with 0 camera devices
+    //
+    // El provider legacy de A13 (2.4/2.5) si sabe hacer de puente: con una
+    // version 3.x construye un ICameraDevice@3.3 (shim propio que convierte
+    // el HAL camera1 a la interfaz Treble) y ademas anade el alias v1 para
+    // los clientes camera1. Ese alias es el que el framework descarta, pero
+    // el dispositivo v3 se枚举 correctamente.
+    //
+    // La v3.4 es la mas antigua que acepta el provider sin exigir un
+    // CAMERA_MODULE_API_VERSION_2_5 (checkCameraVersion) y la que espera el
+    // framework.
+    info->device_version = CAMERA_DEVICE_API_VERSION_3_4;
     // Set resource fields the old vendor HAL doesn't know about (API 2.2+)
     info->resource_cost = 100;
     info->conflicting_devices = NULL;
