@@ -52,6 +52,7 @@
 /dev/video51              0666   media      graphics
 /dev/m2m1shot_scaler0     0666   cameraserver      graphics
 /dev/m2m1shot_scaler1     0666   cameraserver      graphics
+/dev/m2m1shot_jpeg        0660   cameraserver      cameraserver
 
 /dev/video55              0666   system     graphics
 /dev/fimg2d               0666   system     graphics

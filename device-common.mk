@@ -174,8 +174,18 @@ PRODUCT_PACKAGES += \
     init.universal3475.rc \
     init.universal3475.usb.rc \
     init.recovery.universal3475.rc \
-    init.wifi.rc \
-    ueventd.universal3475.rc
+    init.wifi.rc
+
+# Reglas de permisos de ueventd (camara, sensores, ion, cpufreq...).
+#
+# En A13 estas reglas van en /vendor/etc/ueventd.rc, que es lo que importa
+# /system/etc/ueventd.rc. Antes se instalaban como prebuilt con
+# LOCAL_MODULE_PATH := $(TARGET_ROOT_OUT), o sea en la RAIZ de la ROM, donde
+# no las lee nadie: por eso /dev/m2m1shot_jpeg (el codificador JPEG de la
+# camara) se quedaba en root:root y cameraserver no lo podia abrir.
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/ramdisk/etc/ueventd.universal3475.rc:$(TARGET_COPY_OUT_VENDOR)/etc/ueventd.rc
+
 # SamsungDoze
 PRODUCT_PACKAGES += \
     SamsungDoze
