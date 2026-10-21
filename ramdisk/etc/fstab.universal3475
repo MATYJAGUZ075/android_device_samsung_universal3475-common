@@ -28,7 +28,13 @@
 # referenced: 81 at parent inode: 72" (72 = dir lib/ del apex adbd,
 # 81 = symlink libcutils.so). El inodo danado cambiaba entre arranques, lo que
 # descarta un sector fisico malo.
-/dev/block/platform/13540000.dwmmc0/by-name/SYSTEM      /system     ext4    ro,noatime,errors=remount-ro,data=ordered                          wait,recoveryonly
+#
+# OJO con el flag fs_mgr "recoveryonly": hacia que /system NO se montara en el
+# arranque normal (solo en recovery), y por eso el zygote veia un arbol de
+# ficheros incompleto y fallaba al precargar
+# "android.app.SystemServiceRegistry" con "NoClassDefFoundError: Class not
+# found using the boot class loader". Sin ese flag, /system se monta siempre.
+/dev/block/platform/13540000.dwmmc0/by-name/SYSTEM      /system     ext4    ro,noatime,errors=remount-ro,data=ordered                          wait
 /dev/block/platform/13540000.dwmmc0/by-name/BOOT        /boot       emmc    defaults                                                                        defaults
 /dev/block/platform/13540000.dwmmc0/by-name/OTA         /misc       emmc    defaults                                                                        defaults
 /dev/block/platform/13540000.dwmmc0/by-name/RECOVERY    /recovery   emmc    defaults                                                                        defaults
