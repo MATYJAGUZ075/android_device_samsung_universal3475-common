@@ -282,9 +282,10 @@ PRODUCT_PACKAGES += \
     libwpa_client \
     TetheringOverlay
 # Wi-Fi Configs
-PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/configs/wifi/p2p_supplicant_overlay.conf:system/vendor/etc/wifi/p2p_supplicant_overlay.conf \
-    $(LOCAL_PATH)/configs/wifi/wpa_supplicant_overlay.conf:system/vendor/etc/wifi/wpa_supplicant_overlay.conf
+# Los overlays de wpa/p2p los aporta el device tree (device/samsung/j2lte),
+# que ya los copia a $(TARGET_COPY_OUT_VENDOR)/etc/wifi/. Aqui solo quedaban
+# referencias a ficheros inexistentes (rompia el build) y con destino
+# system/vendor/etc (ruta no valida en T).
 # Control groups y task profiles para kernels legacy (imprescindible en T;
 # referenciado por init de A13). Contenido orientado a kernel 3.10.
 PRODUCT_COPY_FILES += \
