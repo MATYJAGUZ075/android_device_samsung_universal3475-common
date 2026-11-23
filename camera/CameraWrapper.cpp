@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2017, The LineageOS Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -102,7 +102,21 @@ static int camera_get_number_of_cameras(void)
     ALOGV("%s", __FUNCTION__);
     if (check_vendor_module())
         return 0;
-    return gVendorModule->get_number_of_cameras();
+    int num_cameras = gVendorModule->get_number_of_cameras();
+    // La camara frontal (id "1") no se puede inicializar en este dispositivo:
+    // el HAL de Samsung falla con VIDIOC_S_INPUT al abrir /dev/video102 y
+    // publica un conjunto de parametros vacio (ni focal-length, ni tamanos,
+    // ni modos). Al crear las caracteristicas de esa camara, el framework
+    // reventaba y la app de camara se cerraba al abrirse.
+    //
+    // Se expone solo la camara trasera (id "0"), que si funciona. Si el HAL
+    // llegara a inicializar la frontal, se volverian a exponer todas.
+    if (num_cameras > 1) {
+        ALOGW("%s: exposing only the rear camera, the front one cannot be "
+              "initialized by the vendor HAL", __FUNCTION__);
+        return 1;
+    }
+    return num_cameras;
 }
 
 static int camera_get_camera_info(int camera_id, struct camera_info *info)
