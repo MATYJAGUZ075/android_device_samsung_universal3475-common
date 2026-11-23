@@ -5,3 +5,9 @@ allow hal_graphics_composer_default sysfs_graphics:file rw_file_perms;
 # uevent socket
 allow hal_graphics_composer_default self:netlink_kobject_uevent_socket create_socket_perms_no_ioctl;
 
+# FIX-060: el HWC Exynos/MPP reserva buffers con ion y usa el device GPU
+allow hal_graphics_composer_default ion_device:chr_file rw_file_perms;
+allow hal_graphics_composer_default gpu_device:chr_file rw_file_perms;
+allow hal_graphics_composer_default debugfs_mali:dir r_dir_perms;
+allow hal_graphics_composer_default debugfs_mali:file rw_file_perms;
+

@@ -2,3 +2,11 @@
 allow surfaceflinger secmem_device:chr_file rw_file_perms;
 allow surfaceflinger sysfs_graphics:file rw_file_perms;
 r_dir_file(surfaceflinger, sysfs_graphics)
+
+# FIX-060: el driver Mali (r15p0 sin DMA_FENCE) y el HWC Exynos/MPP usan ion
+# (/dev/ion -> ion_device). A13 solo concede lectura a surfaceflinger y nada
+# al compositor, asi que con SELinux enforcing el driver no puede inicializar
+# y surfaceflinger recibe un EGL con punteros corruptos (SIGSEGV en eglInitialize).
+allow surfaceflinger ion_device:chr_file rw_file_perms;
+allow surfaceflinger debugfs_mali:dir r_dir_perms;
+allow surfaceflinger debugfs_mali:file rw_file_perms;

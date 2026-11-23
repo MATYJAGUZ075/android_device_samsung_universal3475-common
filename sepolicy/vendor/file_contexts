@@ -2,6 +2,12 @@
 # Devices
 #
 /dev/mali[0-9]*              u:object_r:gpu_device:s0
+# FIX-060: sysfs del driver Mali (DVFS, devfreq, debugfs del kernel).
+# Sin etiqueta propia queda como "sysfs" generico y surfaceflinger/HWC no
+# pueden leerlo con enforcing, el driver GPU no arranca.
+/sys/devices/platform/11400000\.mali[0-9]*   u:object_r:sysfs_graphics:s0
+/sys/devices/11400000\.mali[0-9]*            u:object_r:sysfs_graphics:s0
+/sys/class/misc/mali[0-9]*                    u:object_r:sysfs_graphics:s0
 
 /dev/bcm2079x                u:object_r:nfc_device:s0
 /dev/sec-nfc                 u:object_r:nfc_device:s0
