@@ -1,0 +1,4 @@
+# FIX-061: el HAL de audio legacy lee propiedades de plataforma, que A13
+# restringe a los dominios de sistema (default_prop/system_prop).
+allow hal_audio_default default_prop:file r_file_perms;
+allow hal_audio_default system_prop:file r_file_perms;

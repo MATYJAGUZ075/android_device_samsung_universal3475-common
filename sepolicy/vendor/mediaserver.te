@@ -10,3 +10,16 @@ allow mediaserver camera_device:chr_file rw_file_perms;
 # Snap permissions
 allow mediaserver sensorservice_service:service_manager find;
 allow mediaserver system_server:unix_stream_socket rw_stream_socket_perms;
+
+# FIX-061: varios dominios del sistema leen el stub /system/bin/mediaserver
+# (en A13 el mismo binario sirve media y media.metrics). Sin permiso solo
+# se genera ruido de avc.
+allow { netd wificond vdc zygote surfaceflinger audioserver cameraserver } mediaserver_exec:file r_file_perms;
+
+# El kernel 3.10 no tiene el device de cgroup eBPF (/dev/cg2_bpf) que netd
+# intenta abrir: la denegacion es esperable, se silencia.
+dontaudit netd device:dir read;
+
+# El stub /system/bin/mediaserver lo leen varios dominios al arrancar; solo
+# generan ruido de avc.
+dontaudit { rild bootstat } mediaserver_exec:file read;

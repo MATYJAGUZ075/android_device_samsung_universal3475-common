@@ -128,6 +128,12 @@ genfscon sysfs /devices/14800000.dsim      u:object_r:sysfs_graphics:s0
 # video4linux
 genfscon sysfs /devices/12800000.mfc0/video4linux   u:object_r:sysfs_v4l:s0
 
+genfscon sysfs /devices/12c30000.mfc0/video4linux   u:object_r:sysfs_v4l:s0
+genfscon sysfs /devices/14400000.fimc_is/video4linux u:object_r:sysfs_v4l:s0
+genfscon sysfs /devices/fimc_is_sensor.2/video4linux u:object_r:sysfs_v4l:s0
+genfscon sysfs /devices/fimc_is_sensor.3/video4linux u:object_r:sysfs_v4l:s0
+genfscon sysfs /devices/mdev_output.6/video4linux u:object_r:sysfs_v4l:s0
+
 # debugfs de Mali (memtrack)
 genfscon debugfs /mali  u:object_r:debugfs_mali:s0
 genfscon debugfs /mali0 u:object_r:debugfs_mali:s0

@@ -7,3 +7,6 @@ r_dir_file(audioserver, sec_efs_file);
 
 # TFA98xx amplifier
 allow audioserver amplifier_device:chr_file rw_file_perms;
+
+# FIX-061: audioserver (dominio de plataforma) lee una propiedad vendor
+allow audioserver vendor_default_prop:file r_file_perms;

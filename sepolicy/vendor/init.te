@@ -40,7 +40,9 @@ allow init sysfs_camera:file { relabelto setattr };
 allow init sysfs_camera:filesystem associate;
 
 # WiFi firmware permissions
-allow init sysfs_wifi:file setattr;
+# FIX-061: con enforcing init no puede escribir el firmware_path del modulo
+# wifi (dhd) -> el driver se queda sin ruta de firmware y el Wi-Fi no arranca.
+allow init sysfs_wifi:file { write setattr };
 
 # Input devices
 allow init sysfs_input:file { rw_file_perms setattr };
@@ -96,3 +98,4 @@ allow init proc_sec:file { rw_file_perms setattr };
 
 # Sockets
 allow init socket_device:sock_file { read write getattr setattr create unlink };
+

@@ -18,3 +18,8 @@ allow hal_camera_default ion_device:chr_file rw_file_perms;
 allow hal_camera_default mediaserver_exec:file r_file_perms;
 allow hal_camera_default sysfs:file r_file_perms;
 allow hal_camera_default sysfs:dir r_dir_perms;
+
+# FIX-061: el HAL de camara legacy lee propiedades de plataforma, que A13
+# restringe a los dominios de sistema (default_prop/system_prop).
+allow hal_camera_default default_prop:file r_file_perms;
+allow hal_camera_default system_prop:file r_file_perms;
