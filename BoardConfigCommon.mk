@@ -28,14 +28,14 @@ TARGET_SPECIFIC_HEADER_PATH := $(LOCAL_PATH)/include
 TARGET_NO_BOOTLOADER := true
 TARGET_NO_RADIOIMAGE := true
 
-# Platform (Exynos3475 — ARMv7 Cortex-A7, 32-bit puro)
+# Platform (Exynos3475 â€” ARMv7 Cortex-A7, 32-bit puro)
 TARGET_BOARD_PLATFORM := exynos5
 TARGET_SLSI_VARIANT := bsp
 TARGET_SOC := exynos3475
 TARGET_BOOTLOADER_BOARD_NAME := universal3475
 BOARD_VENDOR := samsung
 
-# Binder (32-bit only — no aplicar TARGET_USES_64_BIT_BINDER)
+# Binder (32-bit only â€” no aplicar TARGET_USES_64_BIT_BINDER)
 
 # CPU
 TARGET_ARCH := arm
@@ -44,21 +44,21 @@ TARGET_CPU_ABI := armeabi-v7a
 TARGET_CPU_ABI2 := armeabi
 TARGET_CPU_VARIANT := cortex-a7
 
-# Memory — 1 GB RAM: jemalloc Svelte (recomendado AOSP para low-RAM).
+# Memory â€” 1 GB RAM: jemalloc Svelte (recomendado AOSP para low-RAM).
 # MALLOC_SVELTE es variable de BoardConfig, no de producto.
 MALLOC_SVELTE := true
 
 # Modelo bootimg del J2 (FIX-028): el kernel compila zImage-dtb
 # (CONFIG_BUILD_ARM_APPENDED_DTB_IMAGE=y, defconfig:530) => los DTB van
 # DENTRO del zImage. No hay dt.img separado ni dtbtool (eliminado de
-# lineage-20.0). mkbootimg.mk sigue usándose por SEANDROIDENFORCE.
+# lineage-20.0). mkbootimg.mk sigue usÃ¡ndose por SEANDROIDENFORCE.
 BOARD_CUSTOM_BOOTIMG := true
 BOARD_CUSTOM_BOOTIMG_MK := hardware/samsung/mkbootimg.mk
 BOARD_MKBOOTIMG_ARGS := --kernel_offset 0x00008000 --ramdisk_offset 0x01000000 --tags_offset 0x00000100
 BOARD_KERNEL_BASE := 0x10000000
 BOARD_KERNEL_PAGESIZE := 2048
 BOARD_KERNEL_IMAGE_NAME := zImage-dtb
-# FIX-034: recovery.img excedía la partición en ~446KB con gzip; xz reduce
+# FIX-034: recovery.img excedÃ­a la particiÃ³n en ~446KB con gzip; xz reduce
 # el ramdisk sustancialmente (soporte nativo build/make core/Makefile:894).
 BOARD_RAMDISK_USE_XZ := true
 # BOARD_KERNEL_CMDLINE: el bootloader ignora el cmdline del boot.img
@@ -70,9 +70,9 @@ TARGET_FS_CONFIG_GEN := $(LOCAL_PATH)/config.fs
 TARGET_KERNEL_ARCH := arm
 TARGET_LINUX_KERNEL_VERSION := 3.10
 TARGET_KERNEL_SOURCE := kernel/samsung/exynos3475
-# Compilación con clang moderno (referencia Exynos7420 LOS20: clang r416183b).
-# TODO(fase 1): ajustar versión de clang y completar backports (eBPF, binder
-# freezer, renameat2, shrinker). El defconfig actual aún es el de 17.1.
+# CompilaciÃ³n con clang moderno (referencia Exynos7420 LOS20: clang r416183b).
+# TODO(fase 1): ajustar versiÃ³n de clang y completar backports (eBPF, binder
+# freezer, renameat2, shrinker). El defconfig actual aÃºn es el de 17.1.
 TARGET_KERNEL_CLANG := true
 TARGET_KERNEL_CLANG_VERSION := r450784d
 TARGET_KERNEL_LLVM_BINUTILS := false
@@ -84,26 +84,26 @@ BOARD_HAS_LARGE_FILESYSTEM := true
 TARGET_USERIMAGES_USE_EXT4 := true
 BOARD_CACHEIMAGE_FILE_SYSTEM_TYPE := ext4
 
-# Vendor separation — validado viable en T por el porte Exynos7420.
+# Vendor separation â€” validado viable en T por el porte Exynos7420.
 TARGET_COPY_OUT_VENDOR := system/vendor
 
 # Device Tree
 BOARD_USES_DT := true
 
-# VINTF — estrategia legacy: manifest target-level=3 (FCM R) con HALs HIDL.
+# VINTF â€” estrategia legacy: manifest target-level=3 (FCM R) con HALs HIDL.
 DEVICE_MANIFEST_FILE += device/samsung/j2lte/manifest.xml
 # FIX-036: sin DEVICE_MATRIX_FILE propio -> libhidl usa su
 # device_compatibility_matrix.default.xml (la ruta con $(LOCAL_PATH)
-# resolvía contaminada a system/libhidl/vintfdata y rompía Ninja).
-# DEVICE_MANIFEST_FILE arriba sí usa ruta TOP-explícita.
+# resolvÃ­a contaminada a system/libhidl/vintfdata y rompÃ­a Ninja).
+# DEVICE_MANIFEST_FILE arriba sÃ­ usa ruta TOP-explÃ­cita.
 PRODUCT_ENFORCE_VINTF_MANIFEST_OVERRIDE := true
 
 # Graphics
 NUM_FRAMEBUFFER_SURFACE_BUFFERS := 3
 BOARD_USES_EXYNOS5_COMMON_GRALLOC := true
 
-# Samsung OpenMAX (TODO fase 4: evaluar migración Codec2; flags conservados
-# porque los makefiles SLSI siguen consumiéndolos).
+# Samsung OpenMAX (TODO fase 4: evaluar migraciÃ³n Codec2; flags conservados
+# porque los makefiles SLSI siguen consumiÃ©ndolos).
 BOARD_USE_STOREMETADATA := true
 BOARD_USE_METADATABUFFERTYPE := true
 BOARD_USE_DMA_BUF := true
@@ -158,7 +158,7 @@ AUDIOSERVER_MULTILIB := 32
 # Sensors
 TARGET_NO_SENSOR_PERMISSION_CHECK := true
 
-# Wifi — receta bcmdhd validada en LOS 20 por universal7420:
+# Wifi â€” receta bcmdhd validada en LOS 20 por universal7420:
 # VER_0_8_X se mantiene, pero con la interfaz HIDL de wpa_supplicant.
 BOARD_WLAN_DEVICE := bcmdhd
 BOARD_HOSTAPD_DRIVER := NL80211
@@ -209,9 +209,9 @@ TARGET_RECOVERY_FSTAB := $(LOCAL_PATH)/ramdisk/etc/fstab.universal3475
 
 # SELinux
 # Estructura LOS20: policies del device en sepolicy/vendor.
-# TODO(fase 3+): nuncaallows de plataforma 33 sin resolver — durante el porte
+# TODO(fase 3+): nuncaallows de plataforma 33 sin resolver â€” durante el porte
 # se permite ignorarlos (mismo enfoque que Exynos7420) hasta endurecer.
-BOARD_VENDOR_SEPOLICY_DIRS += $(LOCAL_PATH)/sepolicy/vendor
+BOARD_VENDOR_SEPOLICY_DIRS += device/samsung/universal3475-common/sepolicy/vendor
 SELINUX_IGNORE_NEVERALLOWS := true
 
 # Soong namespaces
@@ -256,4 +256,4 @@ TARGET_SYSTEM_PROP += device/samsung/universal3475-common/system.prop
 
 # NOTA (eliminado respecto a 17.1):
 #   BOARD_SEPOLICY_DIRS / BOARD_SEPOLICY_VERS -> reemplazados por
-#   BOARD_VENDOR_SEPOLICY_DIRS (la versión se sigue a la plataforma T).
+#   BOARD_VENDOR_SEPOLICY_DIRS (la versiÃ³n se sigue a la plataforma T).
