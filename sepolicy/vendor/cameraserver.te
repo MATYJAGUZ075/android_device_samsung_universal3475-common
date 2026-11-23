@@ -1,6 +1,9 @@
 # /dev/m2m1shot_jpeg
 allow cameraserver camera_device:chr_file rw_file_perms;
 
+# /dev/ion (el driver Mali r15p0 no usa DMA_FENCE, reserva con ion)
+allow cameraserver ion_device:chr_file rw_file_perms;
+
 # /sys/devices/virtual/camera/*/*_camfw
 allow cameraserver sysfs_camera:dir search;
 allow cameraserver sysfs_camera:file rw_file_perms;

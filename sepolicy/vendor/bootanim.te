@@ -1,0 +1,8 @@
+# El bootanimation inicializa un contexto EGL con el driver Mali (r15p0 sin
+# DMA_FENCE) y para ello lee /sys/kernel/debug/mali0/mem (debugfs_mali).
+# Sin esta regla el driver no inicializa y devuelve punteros corruptos:
+# eglQueryString(EGL_EXTENSIONS) devuelve un puntero invalido y el
+# bootanimation revienta con SIGSEGV dentro de egl_display_t::initialize
+# (strstr), dejando la pantalla congelada en el arranque.
+allow bootanim debugfs_mali:dir r_dir_perms;
+allow bootanim debugfs_mali:file r_file_perms;

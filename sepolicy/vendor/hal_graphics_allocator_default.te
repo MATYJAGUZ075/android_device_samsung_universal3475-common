@@ -1,0 +1,2 @@
+# El allocator de graficos de Mali lee su propiedad de configuracion.
+get_prop(hal_graphics_allocator_default, graphics_config_prop)
