@@ -387,3 +387,13 @@ PRODUCT_SYSTEM_PROPERTIES += \
 PRODUCT_SYSTEM_PROPERTIES += \
     persist.adb.nonblocking_ffs=0 \
     ro.adb.nonblocking_ffs=0
+
+# A2DP: HAL legacy de audio Bluetooth.
+# En A13 el modulo original vive dentro del apex com.android.bluetooth (que no
+# se monta en este ROM), por lo que el framework no encontraba
+# audio.a2dp.default.so y el modulo "a2dp" de la politica de audio nunca se
+# abria: el audio no llegaba a los auriculares Bluetooth.
+# Aqui se compila el mismo HAL legacy como modulo de sistema para que se
+# instale en /system/lib/hw/audio.a2dp.default.so.
+PRODUCT_PACKAGES += \
+    audio.a2dp.j2lte
