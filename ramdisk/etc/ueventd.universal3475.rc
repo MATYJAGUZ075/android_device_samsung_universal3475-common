@@ -1,4 +1,4 @@
-/dev/mali0                0666   system     system
+﻿/dev/mali0                0666   system     system
 /dev/ion                  0666   system     system
 /dev/ump                  0666   system     graphics
 /dev/exynos-mem           0660   system     graphics
@@ -190,3 +190,10 @@
 # Fingerprint Sensor
 /dev/vfsspi        0660   system     system
 /dev/esfp0         0660   system     system
+
+
+# zram: swap comprimido en RAM (256 MB con LZ4, activated in init/zram.rc).
+# /dev is a tmpfs in this ROM, not devtmpfs, so without this rule the node
+# never appears and the swapon in post-fs-data fails: the phone ends up
+# swapping to the flash partition (vnswap0) only.
+/dev/zram0             0660   root       system
