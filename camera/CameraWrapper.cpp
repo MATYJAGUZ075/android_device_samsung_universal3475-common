@@ -41,6 +41,7 @@ android::Mutex gCameraWrapperLock;
 
 static camera_module_t *gVendorModule = 0;
 static const camera_module_callbacks_t *gCallbacks = NULL;
+static bool gFrontCameraUsable = false;
 
 static int check_vendor_module()
 {
@@ -98,24 +99,38 @@ static int camera_device_open(const hw_module_t* module, const char* name,
 
 static int camera_get_number_of_cameras(void)
 {
-    android::Mutex::Autolock lock(gCameraWrapperLock);
-    ALOGV("%s", __FUNCTION__);
-    if (check_vendor_module())
-        return 0;
-    int num_cameras = gVendorModule->get_number_of_cameras();
-    // La camara frontal (id "1") no se puede inicializar en este dispositivo:
-    // el HAL de Samsung falla con VIDIOC_S_INPUT al abrir /dev/video102 y
-    // publica un conjunto de parametros vacio (ni focal-length, ni tamanos,
-    // ni modos). Al crear las caracteristicas de esa camara, el framework
-    // reventaba y la app de camara se cerraba al abrirse.
-    //
-    // Se expone solo la camara trasera (id "0"), que si funciona. Si el HAL
-    // llegara a inicializar la frontal, se volverian a exponer todas.
-    if (num_cameras > 1) {
-        ALOGW("%s: exposing only the rear camera, the front one cannot be "
-              "initialized by the vendor HAL", __FUNCTION__);
-        return 1;
+    int num_cameras = 0;
+
+    {
+        android::Mutex::Autolock lock(gCameraWrapperLock);
+        ALOGV("%s", __FUNCTION__);
+        if (check_vendor_module())
+            return 0;
+        num_cameras = gVendorModule->get_number_of_cameras();
     }
+
+    // La camara frontal (id "1") solo se expone si el HAL de Samsung
+    // consigue inicializarla. Si no puede abrir /dev/video102 (el nodo
+    // FIMC de captura frontal) publica un conjunto de parametros vacio y el
+    // framework de Android 13 reventaba al construir las caracteristicas
+    // estaticas de esa camara, cerrando la app de camara al abrirse.
+    //
+    // El sondeo se hace FUERA del lock: camera2_device_is_usable() abre y
+    // cierra el dispositivo y toma gCameraWrapperLock por su cuenta.
+    if (num_cameras > 1 && !gFrontCameraUsable) {
+        gFrontCameraUsable = camera2_device_is_usable("1") == 1;
+        if (gFrontCameraUsable) {
+            ALOGI("%s: la camara frontal se inicializa correctamente, "
+                  "se expone junto a la trasera", __FUNCTION__);
+        } else {
+            ALOGW("%s: exposing only the rear camera, the front one cannot be "
+                  "initialized by the vendor HAL", __FUNCTION__);
+        }
+    }
+
+    if (num_cameras > 1 && !gFrontCameraUsable)
+        return 1;
+
     return num_cameras;
 }
 

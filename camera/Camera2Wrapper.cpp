@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2017, The LineageOS Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -643,6 +643,64 @@ done:
 
     return ret;
 }
+
+static bool flattened_param_has_value(const char *params, const char *key)
+{
+    if (params == NULL || key == NULL)
+        return false;
+
+    size_t key_len = strlen(key);
+    const char *p = params;
+
+    while ((p = strstr(p, key)) != NULL) {
+        bool at_key_start = (p == params) || (p[-1] == ';');
+        if (at_key_start && p[key_len] == '=') {
+            const char *value = p + key_len + 1;
+            const char *end = strchr(value, ';');
+            size_t len = end ? (size_t)(end - value) : strlen(value);
+            return len > 0;
+        }
+        p += key_len;
+    }
+
+    return false;
+}
+
+int camera2_device_is_usable(const char *id)
+{
+    hw_device_t *device = NULL;
+    camera_device_t *cam = NULL;
+    char *params = NULL;
+    bool usable = false;
+
+    if (id == NULL)
+        return 0;
+
+    if (camera2_device_open(NULL, id, &device) != 0 || device == NULL) {
+        ALOGW("%s: la camara %s no se pudo abrir en el HAL de Samsung",
+                __FUNCTION__, id);
+        return 0;
+    }
+
+    cam = (camera_device_t *)device;
+    if (cam->ops != NULL && cam->ops->get_parameters != NULL) {
+        params = cam->ops->get_parameters(cam);
+        usable = flattened_param_has_value(params, "supported-picture-sizes") &&
+                 flattened_param_has_value(params, "focal-length");
+    }
+
+    if (params != NULL)
+        free(params);
+
+    camera2_device_close(device);
+
+    if (!usable)
+        ALOGW("%s: la camara %s se abrio pero el HAL no publico parametros validos",
+                __FUNCTION__, id);
+
+    return usable ? 1 : 0;
+}
+
 
 /*******************************************************************
  * implementation of camera_module functions

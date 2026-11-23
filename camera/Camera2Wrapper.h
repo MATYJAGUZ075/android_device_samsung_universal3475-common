@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2017, The LineageOS Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,3 +18,15 @@
 #include <hardware/camera2.h>
 
 int camera2_device_open(const hw_module_t* module, const char* name, hw_device_t** device);
+
+/*
+ * Abre la camara indicada contra el HAL de Samsung y comprueba que el HAL
+ * publica parametros utilizables (tamanos de captura y distancia focal).
+ * Devuelve 1 si la camara se puede inicializar y 0 si no.
+ *
+ * Se usa para decidir si la camara frontal se expone al framework: si el
+ * HAL no consigue inicializarla (no puede abrir /dev/video102) publica un
+ * conjunto de parametros vacio y el framework de Android 13 reventaba al
+ * construir las caracteristicas estaticas de esa camara.
+ */
+int camera2_device_is_usable(const char* id);
