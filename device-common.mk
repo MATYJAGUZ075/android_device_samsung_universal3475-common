@@ -434,5 +434,3 @@ PRODUCT_SYSTEM_PROPERTIES += \
 # abria: el audio no llegaba a los auriculares Bluetooth.
 # Aqui se compila el mismo HAL legacy como modulo de sistema para que se
 # instale en /system/lib/hw/audio.a2dp.default.so.
-PRODUCT_PACKAGES += \
-    audio.a2dp.j2lte
