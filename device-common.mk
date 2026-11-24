@@ -94,7 +94,7 @@ PRODUCT_PACKAGES += \
     android.hardware.keymaster@3.0-impl \
     android.hardware.keymaster@3.0-service
 # Gatekeeper (software) - sin este HAL, gatekeeperd responde "has no HAL to talk to" y SyntheticPasswordManager.createPasswordBasedSyntheticPassword() falla con "Fail to enroll user password when creating SP". Como consecuencia LockSettingsService no puede guardar ningun credential (PIN, patron, clave): el usuario ve el aviso de "configurado" pero el bloqueo sigue en "deslizar". La implementacion software de AOSP (scrypt en espacio de usuario) es suficiente para este dispositivo, que no tiene TEE de gatekeeper.
-PRODUCT_PACKAGES +=
+PRODUCT_PACKAGES += \
     android.hardware.gatekeeper@1.0-service.software
 # Lights — FIX-024: android.hardware.light@2.0-service.samsung NO existe en
 # hardware/samsung lineage-20 (sin dir lights). LIMITACIÓN: sin HAL de lights
