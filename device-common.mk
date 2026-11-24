@@ -28,7 +28,7 @@ PRODUCT_COPY_FILES += \
     frameworks/av/services/audiopolicy/config/r_submix_audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/r_submix_audio_policy_configuration.xml \
     frameworks/av/services/audiopolicy/config/usb_audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/usb_audio_policy_configuration.xml \
     $(LOCAL_PATH)/configs/audio/audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/audio_policy_configuration.xml
-# Bluetooth â€” HAL HIDL 1.0 custom del common (enfoque Exynos7420).
+# Bluetooth — HAL HIDL 1.0 custom del common (enfoque Exynos7420).
 # libbt-vendor no se declara en PRODUCT_PACKAGES: no es un modulo de AOSP que
 # nos sirva aqui, sino la libreria de transporte HCI real, que se instala
 # como blob vendor. El impl.3475 la abre por soname en runtime
@@ -61,9 +61,9 @@ PRODUCT_PACKAGES += \
     android.hardware.drm@1.0-impl \
     android.hardware.drm@1.0-service \
     android.hardware.drm-service.clearkey
-# Flat device tree for boot image â€” FIX-027: dtbhtoolExynos retirado de
+# Flat device tree for boot image — FIX-027: dtbhtoolExynos retirado de
 # HOST_PACKAGES: su fuente (system/tools/dtbtool) fue eliminada de
-# lineage-20.0 (404 verificado) y solo se definÃ­a bajo BUILD_TINY_ANDROID.
+# lineage-20.0 (404 verificado) y solo se definía bajo BUILD_TINY_ANDROID.
 # PENDIENTE separado: portar dtbtool/prebuilt para generar dt.img en bacon
 # (BOARD_CUSTOM_BOOTIMG_MK sigue activo en BoardConfigCommon.mk).
 # GPS
@@ -73,8 +73,8 @@ PRODUCT_PACKAGES += \
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/gps/gps.conf:system/etc/gps.conf \
     $(LOCAL_PATH)/configs/gps/gps.xml:system/etc/gps.xml
-# Graphics â€” stack SLSI exynos5 legacy con adapters (receta 7420).
-# TODO(fase 2): validar compilaciÃ³n contra hardware/samsung_slsi actualizado.
+# Graphics — stack SLSI exynos5 legacy con adapters (receta 7420).
+# TODO(fase 2): validar compilación contra hardware/samsung_slsi actualizado.
 PRODUCT_PACKAGES += \
     libion \
     libfimg \
@@ -88,17 +88,17 @@ PRODUCT_PACKAGES += \
     android.hardware.health@2.1-impl \
     android.hardware.health@2.1-service
 # Keymaster 3.0 + keystore TEE (blobs mobicore intactos)
-# FIX-049: keystore.exynos7570 deshabilitado â€” libkeymaster/ver0 usa headers
+# FIX-049: keystore.exynos7570 deshabilitado — libkeymaster/ver0 usa headers
 # legacy de Android 6-7 inexistentes en lineage-20.0.
 PRODUCT_PACKAGES += \
     android.hardware.keymaster@3.0-impl \
     android.hardware.keymaster@3.0-service
 # Gatekeeper (software) - sin este HAL, gatekeeperd responde "has no HAL to talk to" y SyntheticPasswordManager.createPasswordBasedSyntheticPassword() falla con "Fail to enroll user password when creating SP". Como consecuencia LockSettingsService no puede guardar ningun credential (PIN, patron, clave): el usuario ve el aviso de "configurado" pero el bloqueo sigue en "deslizar". La implementacion software de AOSP (scrypt en espacio de usuario) es suficiente para este dispositivo, que no tiene TEE de gatekeeper.
-PRODUCT_PACKAGES += 
+PRODUCT_PACKAGES +=
     android.hardware.gatekeeper@1.0-service.software
-# Lights â€” FIX-024: android.hardware.light@2.0-service.samsung NO existe en
-# hardware/samsung lineage-20 (sin dir lights). LIMITACIÃ“N: sin HAL de lights
-# hasta portar/crear uno (no crÃ­tico para boot).
+# Lights — FIX-024: android.hardware.light@2.0-service.samsung NO existe en
+# hardware/samsung lineage-20 (sin dir lights). LIMITACIÓN: sin HAL de lights
+# hasta portar/crear uno (no crítico para boot).
 # Media
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/media/media_codecs.xml:$(TARGET_COPY_OUT_VENDOR)/etc/media_codecs.xml \
@@ -120,12 +120,12 @@ PRODUCT_PACKAGES += \
     mcDriverDaemon \
     libMcClient \
     libMcRegistry
-# Power â€” FIX-035: esto SÃ era crÃ­tico para boot, contra lo que decÃ­a el
+# Power — FIX-035: esto SÍ era crítico para boot, contra lo que decía el
 # comentario anterior de FIX-024.
 #
-# El manifest declaraba android.hardware.power@1.0 (HIDL) pero no habÃ­a ningÃºn
+# El manifest declaraba android.hardware.power@1.0 (HIDL) pero no había ningún
 # HAL: power@1.0-service.exynos no existe en LOS20. Con el manifest declarando
-# el HAL y sin implementaciÃ³n, PowerManagerService.nativeInit() se quedaba
+# el HAL y sin implementación, PowerManagerService.nativeInit() se quedaba
 # esperando para siempre. Medido en el ANR de system_server:
 #
 #   #05 android::hardware::details::Waiter::wait(bool)
@@ -135,11 +135,11 @@ PRODUCT_PACKAGES += \
 #   at com.android.server.power.PowerManagerService.nativeInit(Native method)
 #
 # -> Watchdog WAITED_HALF -> ANR -> reinicio de zygote, en bucle. El sistema
-# nunca llegaba a boot_completed y se quedaba en la animaciÃ³n de arranque.
+# nunca llegaba a boot_completed y se quedaba en la animación de arranque.
 #
-# SoluciÃ³n: el HAL de power AIDL de Samsung, que sÃ­ existe en la rama lineage-20
+# Solución: el HAL de power AIDL de Samsung, que sí existe en la rama lineage-20
 # de hardware/samsung (aidl/power-libperfmgr). Trae su propio fragment VINTF
-# con override="true", que sustituye la declaraciÃ³n HIDL.
+# con override="true", que sustituye la declaración HIDL.
 # NO se anade android.hardware.power-service.samsung-libperfmgr.
 # Se descarto tras verificar que es inconstruible en A13: su Android.bp declara
 #   shared_libs: [... "libperfmgr" "pixel-power-ext-V1-ndk"]
@@ -259,14 +259,14 @@ PRODUCT_PACKAGES += \
 # RT_HDR, METERING_CENTER, DYNAMIC_RANGE_CONTROL, PIXEL_FORMAT_YUV420SP_NV21,
 # EFFECT_CARTOONIZE, ...). Sin el, el blob de camara no puede resolverlas.
 # Siguen fuera libexynoscamera_shim y libui_shim: siguen sin fuente.
-# FIX-022: libstdc++ ya NO es shim propio â€” bionic/libc de lineage-20.0
+# FIX-022: libstdc++ ya NO es shim propio — bionic/libc de lineage-20.0
 # define cc_library "libstdc++" (vendor_available) con new.cpp,
 # __cxa_guard.cpp y __cxa_pure_virtual.cpp: cubre operadores, pure_virtual Y
 # guards que los blobs legacy necesitan (sensors/camera/sec-ril).
-# FIX-021: libhardware_legacy ya NO es shim propio â€” LineageOS lineage-20.0
+# FIX-021: libhardware_legacy ya NO es shim propio — LineageOS lineage-20.0
 # mantiene hardware/libhardware_legacy (cc_library_shared vendor_available+VNDK)
-# con las mismas acquire/release_wake_lock que gpsd consume (auditorÃ­a UND
-# FIX-008). El PRODUCT_PACKAGES de abajo instala ahora el mÃ³dulo upstream.
+# con las mismas acquire/release_wake_lock que gpsd consume (auditoría UND
+# FIX-008). El PRODUCT_PACKAGES de abajo instala ahora el módulo upstream.
 # FIX-020: libhidltransport eliminada del BT HAL (fusionada en libhidlbase en R).
 # Dependencias del blob de camara.
 #
@@ -300,7 +300,7 @@ PRODUCT_COPY_FILES += \
 # USB
 PRODUCT_PACKAGES += \
     android.hardware.usb@1.0-service.basic
-# Wi-Fi â€” bcmdhd (driver NL80211 en kernel) + supplicant/hostapd.
+# Wi-Fi — bcmdhd (driver NL80211 en kernel) + supplicant/hostapd.
 # FIX-017: los modulos del HAL wifi@1.0 no viven en hardware/interfaces LOS20
 # sino en hardware/lineage/interfaces (wifi/1.0-legacy). En nuestro fork se
 # restauran aplicando patches/hardware-lineage-interfaces/*.patch (fase P1).
@@ -357,8 +357,8 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/non_ab_device.mk)
 #   - configstore (eliminado en A12; usar disable_configstore si hace falta)
 #   - renderscript HAL (deprecado en T)
 #   - textclassifier.bundle1
-#   - vendor.lineage.trust@1.0-service (retirado del Ã¡rbol Lineage reciente;
-#     la entrada VINTF correspondiente quedÃ³ marcada TODO en manifest.xml)
+#   - vendor.lineage.trust@1.0-service (retirado del árbol Lineage reciente;
+#     la entrada VINTF correspondiente quedó marcada TODO en manifest.xml)
 #   - tv.input
 #   - audio_policy.conf (formato muerto en T)
 # call Samsung LSI board support package
@@ -369,7 +369,7 @@ $(call inherit-product, vendor/samsung/universal3475-common/universal3475-common
 # Placeholder /cpefs para e2fsdroid (target_files/system.img): el dir debe
 # existir en el staging de SYSTEM para que aplique el selabel de config.fs
 # ([cpefs/] 0771 system:radio). En runtime queda tapado por el mount de la
-# particiÃ³n CPEFS (fstab.universal3475). Archivo vacÃ­o: sin contenido EFS real.
+# partición CPEFS (fstab.universal3475). Archivo vacío: sin contenido EFS real.
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/cpefs.placeholder:system/cpefs/.placeholder
 # ---------------------------------------------------------------------------
@@ -415,7 +415,7 @@ endif
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/init/dbg_adb_root.rc:$(TARGET_COPY_OUT_SYSTEM)/etc/init/dbg_adb_root.rc
 
-# ADB TCP para diagnÃ³stico post-boot
+# ADB TCP para diagnóstico post-boot
 PRODUCT_SYSTEM_PROPERTIES += \
     $(LOCAL_PATH)/system.prop
 

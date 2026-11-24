@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2017, The LineageOS Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,4 +29,4 @@ int camera2_device_open(const hw_module_t* module, const char* name, hw_device_t
  * conjunto de parametros vacio y el framework de Android 13 reventaba al
  * construir las caracteristicas estaticas de esa camara.
  */
-int camera2_device_is_usable(const char* id);
+int camera2_device_is_usable(const char* id);
