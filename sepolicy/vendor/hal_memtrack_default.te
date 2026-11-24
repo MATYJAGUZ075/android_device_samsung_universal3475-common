@@ -1,3 +1,6 @@
 # FIX-056: memtrack de Mali via debugfs (igual que LOS19)
 allow hal_memtrack_default debugfs_mali:dir r_dir_perms;
 allow hal_memtrack_default debugfs_mali:file r_file_perms;
+
+# FIX: hal_memtrack_default lee debugfs (denied en logs: "3116-0" in debugfs)
+allow hal_memtrack_default debugfs:file { read getattr open };

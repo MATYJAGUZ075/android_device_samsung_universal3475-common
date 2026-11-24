@@ -132,6 +132,18 @@ on boot
     chmod 0664 /dev/cpuset/system-background/cpus
     chmod 0664 /dev/cpuset/top-app/cpus
 
+    # FIX: cgroups cgroup.procs permissions for libprocessgroup
+    chown system system /dev/cpuctl/cgroup.procs
+    chown system system /dev/cpuctl/top-app/cgroup.procs
+    chmod 0664 /dev/cpuctl/cgroup.procs
+    chmod 0664 /dev/cpuctl/top-app/cgroup.procs
+    chown system system /dev/cpuset/cgroup.procs
+    chown system system /dev/cpuset/top-app/cgroup.procs
+    chmod 0664 /dev/cpuset/cgroup.procs
+    chmod 0664 /dev/cpuset/top-app/cgroup.procs
+    chown system system /dev/blkio/cgroup.procs
+    chmod 0664 /dev/blkio/cgroup.procs
+
     # Change permissions of the CPU online settings
     chown system system /sys/devices/system/cpu/cpu0/online
     chown system system /sys/devices/system/cpu/cpu1/online
@@ -280,8 +292,14 @@ on fs
  # create data/gps for GPS daemon
     chown root system /dev/ttySAC0
     chmod 0660 /dev/ttySAC0
-    chown root system /sys/class/sec/gps/GPS_PWR_EN/value
+chown root system /sys/class/sec/gps/GPS_PWR_EN/value
     chmod 0664 /sys/class/sec/gps/GPS_PWR_EN/value
+
+    # Camera sensor voltage regulator - keep always-on to prevent sensor shutdown
+    write /sys/class/regulator/VDD_CAM_SENSOR_A2P8/enable 1
+    chmod 0664 /sys/class/regulator/VDD_CAM_SENSOR_A2P8/enable
+    chown system system /sys/class/regulator/VDD_CAM_SENSOR_A2P8/enable
+
     mkdir /data/system 0771 system system
     chown system system /data/system
     mkdir /data/system/gps 0771 system system

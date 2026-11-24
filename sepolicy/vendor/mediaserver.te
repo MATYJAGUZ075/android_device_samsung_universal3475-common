@@ -14,7 +14,7 @@ allow mediaserver system_server:unix_stream_socket rw_stream_socket_perms;
 # FIX-061: varios dominios del sistema leen el stub /system/bin/mediaserver
 # (en A13 el mismo binario sirve media y media.metrics). Sin permiso solo
 # se genera ruido de avc.
-allow { netd wificond vdc zygote surfaceflinger audioserver cameraserver } mediaserver_exec:file r_file_perms;
+allow { netd wificond vdc zygote surfaceflinger audioserver cameraserver platform_app system_app } mediaserver_exec:file r_file_perms;
 
 # El kernel 3.10 no tiene el device de cgroup eBPF (/dev/cg2_bpf) que netd
 # intenta abrir: la denegacion es esperable, se silencia.
