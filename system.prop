@@ -25,3 +25,56 @@ persist.sys.usb.config=mtp,adb
 # Sin autorizacion RSA, adb no crea ~/.android/adbkey ni exige confirmacion, por
 # lo que tambien hay que dejar el pairing en modo "sin paternalidad".
 ro.adb.authenticate=0
+
+# ===== Optimizaciones para 1GB RAM (basado en LOS19 reference) =====
+
+# Dalvik/Art heap - valores conservadores para 1GB RAM
+dalvik.vm.heapstartsize=8m
+dalvik.vm.heaptargetutilization=0.75
+dalvik.vm.heapminfree=2m
+dalvik.vm.heapmaxfree=8m
+dalvik.vm.heapgrowthlimit=128m
+dalvik.vm.heapsize=256m
+
+# Dex2oat optimizado para dispositivos de baja RAM
+dalvik.vm.dex2oat-swap=true
+dalvik.vm.dex2oat-threads=2
+dalvik.vm.boot-dex2oat-threads=2
+dalvik.vm.image-dex2oat-threads=2
+
+# HWC / SurfaceFlinger optimizaciones
+debug.sf.disable_backpressure=1
+debug.sf.latch_unsignaled=1
+ro.surface_flinger.max_frame_buffer_acquired_buffers=3
+ro.zygote.disable_gl_preload=1
+
+# HWUI cache sizes para 1GB RAM
+ro.hwui.texture_cache_size=24
+ro.hwui.layer_cache_size=16
+ro.hwui.path_cache_size=4
+ro.hwui.shape_cache_size=1
+ro.hwui.gradient_cache_size=0.5
+ro.hwui.drop_shadow_cache_size=2
+ro.hwui.r_buffer_cache_size=2
+ro.hwui.text_small_cache_width=1024
+ro.hwui.text_small_cache_height=512
+ro.hwui.text_large_cache_width=2048
+ro.hwui.text_large_cache_height=1024
+ro.hwui.fbo_cache_size=8
+
+# LMKD optimizado para 1GB RAM
+ro.lmk.use_minfree_levels=true
+ro.lmk.use_psi=false
+ro.lmk.critical_upgrade=true
+ro.lmk.upgrade_pressure=40
+ro.lmk.downgrade_pressure=60
+ro.lmk.kill_heaviest_task=true
+
+# OMX / Stagefright
+debug.stagefright.ccodec=0
+debug.stagefright.omx_default_rank=0
+debug.stagefright.omx_default_rank.sw-audio=1
+
+# Small battery (dispositivo de 2015 con batería limitada)
+ro.config.small_battery=true
+ro.config.low_ram=true

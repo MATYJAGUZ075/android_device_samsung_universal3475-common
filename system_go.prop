@@ -1,0 +1,17 @@
+# Sets Android Go recommended default values for properties.
+# Optimizaciones para dispositivo con 1GB RAM (basado en LOS19 reference).
+
+# Set lowram options
+ro.config.low_ram=true
+ro.lmk.critical_upgrade=true
+ro.lmk.upgrade_pressure=40
+ro.lmk.downgrade_pressure=60
+ro.lmk.kill_heaviest_task=true
+
+# set threshold to filter unused apps
+pm.dexopt.downgrade_after_inactive_days=10
+
+# Default heap sizes. Allow up to 256m for large heaps to make sure a single app
+# doesn't take all of the RAM.
+dalvik.vm.heapgrowthlimit=128m
+dalvik.vm.heapsize=256m

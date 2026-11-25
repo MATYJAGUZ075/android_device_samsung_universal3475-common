@@ -1,24 +1,17 @@
 on boot
 # Governor interactive reactivo.
 #
-# Estos valores se escribían en
-#   /sys/devices/system/cpu/cpu0/cpufreq/interactive/...
-# una ruta que no existe en este kernel: en el Exynos 3475 hay una sola
-# política de frecuencia para los 4 cores y sus parámetros están en
-#   /sys/devices/system/cpu/cpufreq/interactive/
-# Así que todos los writes fallaban en silencio y el governor se quedaba con
-# los valores por defecto del kernel (go_hispeed_load=99, target_loads=90,
-# min_sample_time=80 ms, timer_slack=80 ms, io_is_busy=0, boost=0), con el
-# CPU casi siempre en la frecuencia mínima.
+# Valores optimizados basado en LOS19 reference para Exynos 3475.
+# balance entre rendimiento y temperatura/batería.
     write /sys/devices/system/cpu/cpufreq/interactive/timer_rate 20000
-    write /sys/devices/system/cpu/cpufreq/interactive/timer_slack 40000
+    write /sys/devices/system/cpu/cpufreq/interactive/timer_slack 80000
     write /sys/devices/system/cpu/cpufreq/interactive/min_sample_time 20000
     write /sys/devices/system/cpu/cpufreq/interactive/hispeed_freq 1300000
     write /sys/devices/system/cpu/cpufreq/interactive/go_hispeed_load 75
-    write /sys/devices/system/cpu/cpufreq/interactive/target_loads "60 1196000:70 1300000:80"
-    write /sys/devices/system/cpu/cpufreq/interactive/above_hispeed_delay "10000 1300000:5000"
+    write /sys/devices/system/cpu/cpufreq/interactive/target_loads "70 897000:80 1300000:95"
+    write /sys/devices/system/cpu/cpufreq/interactive/above_hispeed_delay "40000"
     write /sys/devices/system/cpu/cpufreq/interactive/io_is_busy 1
-    write /sys/devices/system/cpu/cpufreq/interactive/boost 1
+    write /sys/devices/system/cpu/cpufreq/interactive/boost 0
 
 # Kernel Workqueue
     chown system system /sys/module/workqueue/parameters/power_efficient
